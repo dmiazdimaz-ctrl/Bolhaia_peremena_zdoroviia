@@ -1,19 +1,28 @@
-// Демо-данные прототипа. В рабочей версии — загрузка из CMS / API.
+// Публикации о проекте (заголовки из открытых источников).
 const NEWS = [
-  { cat: "screen", tag: "Скрининг", date: "07.10.2026", icon: "👁️", title: "Стартовал скрининг 2026/2027: первыми обследуют восьмилеток",
-    text: "Школьные медкабинеты начали заполнять «Карты предикторов миопии» для учеников 8 лет." },
-  { cat: "event", tag: "События", date: "25.09.2026", icon: "🤝", title: "Медработники школ прошли обучение по новой методике",
-    text: "Специалисты областной офтальмологической больницы провели семинар по заполнению карты предикторов." },
-  { cat: "parents", tag: "Родителям", date: "18.09.2026", icon: "🏡", title: "Упражнение «Метка на стекле»: как заниматься дома",
-    text: "Курс 15–20 дней, 2 раза в день. Рассказываем, как правильно тренировать аккомодацию." },
-  { cat: "parents", tag: "Родителям", date: "10.09.2026", icon: "🤸", title: "Гимнастика для глаз за 5–7 минут в день",
-    text: "Комплекс из 8 упражнений по методу профессора Аветисова Э.С. — с картинками и таймингом." },
-  { cat: "event", tag: "События", date: "01.09.2026", icon: "🎒", title: "«Большая перемена здоровья» — в школах Воронежа",
-    text: "Программа профилактики школьной миопии стартует в новом учебном году." },
-  { cat: "screen", tag: "Скрининг", date: "20.08.2026", icon: "📋", title: "Утверждён график скрининга на учебный год",
-    text: "Обследования пройдут с октября по апрель для детей 8, 9, 11, 12 и 13 лет; в мае — отчёт." },
+  { cat: "eyes", tag: "Зрение", src: "Вести Воронеж", date: "15.06.2026",
+    title: "Пандемия близорукости. Что может спасти зрение воронежских школьников",
+    text: "В рамках проекта обследуют здоровых детей, чтобы выявить факторы риска миопии до появления болезни.",
+    url: "https://vestivrn.ru/news/2026/06/15/pandemiya-blizorukosti-chto-mozhet-spasti-zrenie-voronezhskikh-shkolnikov/" },
+  { cat: "project", tag: "О проекте", src: "Губерния", date: "",
+    title: "Проект «Большая перемена здоровья» реализуют в Воронежской области",
+    text: "Четыре направления: зрение, репродуктивное здоровье, профилактика сколиоза и борьба с лишним весом.",
+    url: "https://tv-gubernia.ru/novosti/obwestvo/proekt-bolshaya-peremena-zdorovya-realizuyut-v-voronezhskoj-oblasti/" },
+  { cat: "eyes", tag: "Зрение", src: "Портал Воронеж", date: "",
+    title: "Почти у каждого второго воронежского школьника обнаружили проблемы со зрением",
+    text: "Результаты обследований в рамках межведомственного проекта «Большая перемена здоровья».",
+    url: "https://portalvoronezh.ru/news/obschestvo/pochti-u-kazhdogo-vtorogo-voronezhskogo-shkolnika-obnaruzhili-problemy-so-zreniem.html" },
+  { cat: "eyes", tag: "Зрение", src: "Горком36", date: "",
+    title: "Ведущий воронежский офтальмолог рассказала, почему все больше школьников выявляются с риском развития миопии",
+    text: "О предикторах миопии: зрение у ребёнка ещё стопроцентное, но предрасположенность уже есть.",
+    url: "https://gorcom36.ru/content/vedushchiy-voronezhskiy-oftalmolog-rasskazala-pochemu-vse-bolshe-shkolnikov-vyyavlyayutsya-s-riskom-/" },
+  { cat: "project", tag: "О проекте", src: "okob.vrn.ru", date: "",
+    title: "Большая перемена здоровья — страница проекта для родителей",
+    text: "Рекомендации и контакты офтальмологической службы Воронежской области.",
+    url: "https://www.okob.vrn.ru/big-health-change" },
 ];
 
+// Демо-данные аналитики. В рабочей версии — данные координаторов проекта.
 const AGES = [
   { age: "8 лет", plan: 900, fact: 880 },
   { age: "9 лет", plan: 850, fact: 790 },
@@ -52,12 +61,12 @@ nav.addEventListener("click", (e) => { if (e.target.tagName === "A") nav.classLi
 function renderNews(filter) {
   $("#newsList").innerHTML = NEWS.filter((n) => filter === "all" || n.cat === filter).map((n) => `
     <article class="post">
-      <div class="post__img">${n.icon}</div>
+      <div class="post__img">${n.src}</div>
       <div class="post__body">
-        <div class="post__meta"><span class="tag">${n.tag}</span><time>${n.date}</time></div>
+        <div class="post__meta"><span class="tag">${n.tag}</span>${n.date ? `<time>${n.date}</time>` : ""}</div>
         <h4>${n.title}</h4>
         <p>${n.text}</p>
-        <a href="#news">Читать далее →</a>
+        <a href="${n.url}" target="_blank" rel="noopener">Читать в источнике →</a>
       </div>
     </article>`).join("");
 }
