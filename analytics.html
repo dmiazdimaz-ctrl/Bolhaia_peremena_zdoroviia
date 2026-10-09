@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Аналитика · Большая перемена здоровья</title>
+<meta name="description" content="Результаты скрининга проекта.">
+<link rel="icon" href="assets/emblem.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Playfair+Display:ital,wght@1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar__in">
+    <a href="index.html" class="brand">
+      <img src="assets/emblem.png" alt="" width="44" height="36">
+      <span class="brand__txt"><b>Большая перемена</b><small>здоровья | Воронеж</small></span>
+    </a>
+    <button class="burger" aria-label="Меню" aria-expanded="false">☰</button>
+    <nav class="nav">
+      <a href="about.html">О программе</a>
+      <a href="news.html">Новости</a>
+      <a href="analytics.html" aria-current="page">Аналитика</a>
+      <a href="https://okob.vrn.ru" target="_blank" rel="noopener" class="nav__cta">Родителям</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <section class="page-head">
+    <div class="wrap">
+      <p class="crumbs"><a href="index.html">Главная</a> / Аналитика</p>
+      <h1><em>Аналитика</em> скрининга</h1>
+    </div>
+  </section>
+  <section class="section section--first">
+    <div class="wrap">
+      <p class="note">⚠ Демо-данные: открытой статистики проекта нет. Заменить на данные координаторов.</p>
+
+      <div class="kpis">
+        <div class="kpi"><span class="kpi__v">48</span><span class="kpi__l">школ участвуют</span></div>
+        <div class="kpi"><span class="kpi__v">3 120</span><span class="kpi__l">детей прошли скрининг</span></div>
+        <div class="kpi"><span class="kpi__v">27%</span><span class="kpi__l">с предикторами миопии</span></div>
+        <div class="kpi"><span class="kpi__v">214</span><span class="kpi__l">направлены к офтальмологу</span></div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h3>Охват по возрастам</h3>
+          <p class="muted">обследовано / план, человек</p>
+          <div class="bars" id="ageBars"></div>
+        </div>
+        <div class="card">
+          <h3>Распределение по группам риска</h3>
+          <p class="muted">среди обследованных детей</p>
+          <div class="donut-wrap">
+            <svg viewBox="0 0 42 42" class="donut" id="donut" aria-label="Диаграмма групп риска"></svg>
+            <ul class="legend" id="legend"></ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Частота факторов риска</h3>
+        <p class="muted">доля детей, у которых отмечен фактор (по «Карте предикторов»)</p>
+        <div class="hbars" id="factorBars"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap footer__in">
+    <div>
+      <img src="assets/emblem.png" alt="" width="56" height="46">
+      <p><b>Большая перемена здоровья | Воронеж</b><br>Межведомственный проект о здоровье школьников</p>
+    </div>
+    <div>
+      <p class="footer__h">Партнёры</p>
+      <p>Министерство здравоохранения Воронежской области<br>Министерство образования Воронежской области<br>Министерство физической культуры и спорта Воронежской области<br>Управление образования и молодёжной политики администрации г. Воронежа<br>Воронежская областная клиническая офтальмологическая больница</p>
+    </div>
+    <div>
+      <p class="footer__h">Родителям</p>
+      <p><a href="https://okob.vrn.ru" target="_blank" rel="noopener">okob.vrn.ru</a> — рекомендации и контакты офтальмологической службы</p>
+    </div>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

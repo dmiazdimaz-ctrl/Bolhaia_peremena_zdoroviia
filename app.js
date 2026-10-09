@@ -58,8 +58,10 @@ burger.addEventListener("click", () => {
 nav.addEventListener("click", (e) => { if (e.target.tagName === "A") nav.classList.remove("is-open"); });
 
 // Новости
+const newsList = $("#newsList");
 function renderNews(filter) {
-  $("#newsList").innerHTML = NEWS.filter((n) => filter === "all" || n.cat === filter).map((n) => `
+  const limit = Number(newsList.dataset.limit) || NEWS.length;
+  newsList.innerHTML = NEWS.filter((n) => filter === "all" || n.cat === filter).slice(0, limit).map((n) => `
     <article class="post">
       <div class="post__img">${n.src}</div>
       <div class="post__body">
@@ -75,35 +77,37 @@ document.querySelectorAll(".chip").forEach((c) => c.addEventListener("click", ()
   c.classList.add("is-active");
   renderNews(c.dataset.f);
 }));
-renderNews("all");
+if (newsList) renderNews("all");
 
-// Охват по возрастам
-const max = Math.max(...AGES.map((a) => a.plan));
-$("#ageBars").innerHTML = AGES.map((a) => `
-  <div class="bar" title="${a.age}: ${fmt(a.fact)} из ${fmt(a.plan)}">
-    <div class="bar__plan" style="height:${(a.plan / max) * 100}%"></div>
-    <span class="bar__v">${fmt(a.fact)}</span>
-    <div class="bar__fact" style="height:${(a.fact / max) * 88}%"></div>
-  </div>`).join("");
-$("#ageBars").insertAdjacentHTML("afterend",
-  `<div class="bar__x">${AGES.map((a) => `<span>${a.age}</span>`).join("")}</div>`);
+if ($("#ageBars")) {
+  // Охват по возрастам
+  const max = Math.max(...AGES.map((a) => a.plan));
+  $("#ageBars").innerHTML = AGES.map((a) => `
+    <div class="bar" title="${a.age}: ${fmt(a.fact)} из ${fmt(a.plan)}">
+      <div class="bar__plan" style="height:${(a.plan / max) * 100}%"></div>
+      <span class="bar__v">${fmt(a.fact)}</span>
+      <div class="bar__fact" style="height:${(a.fact / max) * 88}%"></div>
+    </div>`).join("");
+  $("#ageBars").insertAdjacentHTML("afterend",
+    `<div class="bar__x">${AGES.map((a) => `<span>${a.age}</span>`).join("")}</div>`);
 
-// Группы риска (кольцевая диаграмма)
-const total = RISK.reduce((s, r) => s + r.value, 0);
-const R = 15.915; // длина окружности = 100
-let offset = 0;
-$("#donut").innerHTML = RISK.map((r) => {
-  const pct = (r.value / total) * 100;
-  const seg = `<circle cx="21" cy="21" r="${R}" fill="none" stroke="${r.color}" stroke-width="6"
-    stroke-dasharray="${pct} ${100 - pct}" stroke-dashoffset="${-offset}"><title>${r.label}: ${fmt(r.value)}</title></circle>`;
-  offset += pct;
-  return seg;
-}).join("");
-$("#legend").innerHTML = RISK.map((r) =>
-  `<li><i style="background:${r.color}"></i><b>${Math.round((r.value / total) * 100)}%</b>${r.label} <span class="muted">(${fmt(r.value)})</span></li>`).join("");
+  // Группы риска (кольцевая диаграмма)
+  const total = RISK.reduce((s, r) => s + r.value, 0);
+  const R = 15.915; // длина окружности = 100
+  let offset = 0;
+  $("#donut").innerHTML = RISK.map((r) => {
+    const pct = (r.value / total) * 100;
+    const seg = `<circle cx="21" cy="21" r="${R}" fill="none" stroke="${r.color}" stroke-width="6"
+      stroke-dasharray="${pct} ${100 - pct}" stroke-dashoffset="${-offset}"><title>${r.label}: ${fmt(r.value)}</title></circle>`;
+    offset += pct;
+    return seg;
+  }).join("");
+  $("#legend").innerHTML = RISK.map((r) =>
+    `<li><i style="background:${r.color}"></i><b>${Math.round((r.value / total) * 100)}%</b>${r.label} <span class="muted">(${fmt(r.value)})</span></li>`).join("");
 
-// Факторы риска
-$("#factorBars").innerHTML = FACTORS.map((f) => `
-  <div class="hbar"><span>${f.label}</span>
-    <div class="hbar__track"><div class="hbar__fill" style="width:${f.pct}%"></div></div>
-    <b>${f.pct}%</b></div>`).join("");
+  // Факторы риска
+  $("#factorBars").innerHTML = FACTORS.map((f) => `
+    <div class="hbar"><span>${f.label}</span>
+      <div class="hbar__track"><div class="hbar__fill" style="width:${f.pct}%"></div></div>
+      <b>${f.pct}%</b></div>`).join("");
+}
