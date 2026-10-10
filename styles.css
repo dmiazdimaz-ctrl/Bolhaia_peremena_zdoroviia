@@ -220,6 +220,8 @@ h3 { font-size: 20px; color: var(--accent-text); }
 .partner__logo:has(img), .partner__logo:has(img) img { background: transparent; }
 .partner__logo:has(img) { border: 0; border-radius: 0; }
 @media (max-width: 720px) {
-  .partners-bar__lbl, .partner__name { display: none; }
-  .partners-bar__in { justify-content: center; }
+  .partners-bar__lbl { display: none; }
+  .partners { flex-direction: column; gap: 6px; }
+  .partner { font-size: 12px; }
+  .partner__logo { width: 32px; height: 32px; }
 }
