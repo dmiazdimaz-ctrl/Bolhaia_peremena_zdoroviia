@@ -19,20 +19,21 @@
   --note-bg: #fff6e5;
   --note-fg: #8a5a00;
   --note-line: #f3dca8;
+  --rail-future: #b9c6d6;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --ink: #e4eaf3; --muted: #9aa8bb; --line: #2a3648; --bg: #0f1724; --tint: #131d2d;
     --accent-text: #8db8f0; --teal-d: #63c9ab; --surface: #172233; --header: rgba(15,23,36,.95);
     --goal: #16302b; --tag-bg: #1b3a33; --track: #26344a;
-    --note-bg: #33270f; --note-fg: #f0c873; --note-line: #5a4519; color-scheme: dark;
+    --note-bg: #33270f; --note-fg: #f0c873; --note-line: #5a4519; --rail-future: #4a5a70; color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --ink: #e4eaf3; --muted: #9aa8bb; --line: #2a3648; --bg: #0f1724; --tint: #131d2d;
   --accent-text: #8db8f0; --teal-d: #63c9ab; --surface: #172233; --header: rgba(15,23,36,.95);
   --goal: #16302b; --tag-bg: #1b3a33; --track: #26344a;
-  --note-bg: #33270f; --note-fg: #f0c873; --note-line: #5a4519; color-scheme: dark;
+  --note-bg: #33270f; --note-fg: #f0c873; --note-line: #5a4519; --rail-future: #4a5a70; color-scheme: dark;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -95,7 +96,13 @@ h3 { font-size: 20px; color: var(--accent-text); }
 
 /* timeline */
 .timeline { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; position: relative; }
-.timeline::before { content: ""; position: absolute; top: 9px; left: 0; right: 0; height: 3px; background: var(--grad); border-radius: 3px; }
+/* rail: segments between dots; filled up to the current stage, dashed after it */
+.timeline li:not(:last-child)::after { content: ""; position: absolute; top: 9px; left: 21px; width: calc(100% - 5px); height: 3px; border-radius: 3px;
+  background: repeating-linear-gradient(90deg, var(--rail-future) 0 6px, transparent 6px 12px); }
+.timeline li:has(~ li.is-now)::after { background: var(--blue); }
+.timeline li:has(+ li.is-now)::after { background: linear-gradient(90deg, var(--blue), var(--teal)); }
+.timeline li.is-now ~ li::before { border-color: var(--rail-future); }
+.timeline li.is-now ~ li time { color: var(--muted); }
 .timeline li { position: relative; padding-top: 32px; display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
 .timeline li::before { content: ""; position: absolute; top: 0; left: 0; width: 21px; height: 21px; border-radius: 50%; background: var(--surface); border: 4px solid var(--blue); }
 .timeline li.is-now::before { background: var(--teal); border-color: var(--teal); box-shadow: 0 0 0 6px rgba(79,184,155,.25); }
@@ -164,7 +171,9 @@ h3 { font-size: 20px; color: var(--accent-text); }
   .news { grid-template-columns: 1fr 1fr; }
   .kpis { grid-template-columns: 1fr 1fr; }
   .timeline { grid-template-columns: 1fr; gap: 20px; padding-left: 36px; }
-  .timeline::before { top: 0; bottom: 0; left: 9px; right: auto; width: 3px; height: auto; }
+  .timeline li:not(:last-child)::after { top: 23px; left: -27px; width: 3px; height: calc(100% - 1px);
+    background: repeating-linear-gradient(180deg, var(--rail-future) 0 6px, transparent 6px 12px); }
+  .timeline li:has(+ li.is-now)::after { background: linear-gradient(180deg, var(--blue), var(--teal)); }
   .timeline li { padding-top: 0; }
   .timeline li::before { left: -36px; top: 2px; }
   .hbar { grid-template-columns: 1fr 48px; }
