@@ -37,17 +37,17 @@ function renderAdmin() {
 function summary(body) {
   const by = (r) => STATE.users.filter((x) => x.role === r).length;
   const reqs = STATE.requests || [];
-  const filled = STATE.students.filter((s) => s.card);
-  const lv = [0, 1, 2, 3].map((l) => filled.filter((s) => riskLevel(s.card) === l).length);
+  const reps = STATE.reports || [], lv = sumLevels(reps);
+  const screened = reps.reduce((a, r) => a + r.screened, 0);
   body.innerHTML = `<div class="kpis">
       <div class="kpi"><span class="kpi__v">${reqs.length}</span><span class="kpi__l">заявок от родителей</span></div>
       <div class="kpi"><span class="kpi__v">${by("medic")}</span><span class="kpi__l">медработников</span></div>
-      <div class="kpi"><span class="kpi__v">${filled.length} / ${STATE.students.length}</span><span class="kpi__l">карт заполнено</span></div>
+      <div class="kpi"><span class="kpi__v">${screened}</span><span class="kpi__l">детей обследовано</span></div>
       <div class="kpi"><span class="kpi__v">${lv[3]}</span><span class="kpi__l">направлены к офтальмологу</span></div>
     </div>
-    <div class="card"><h3>Группы риска по заполненным картам</h3>
+    <div class="card"><h3>Группы риска по отчётам школ</h3>
       <div class="hbars">${[0, 1, 2, 3].map((l) => `<div class="hbar"><span>${RISK_LEVELS[l].label}</span>
-        <div class="hbar__track"><div class="hbar__fill" style="width:${filled.length ? (lv[l] / filled.length) * 100 : 0}%"></div></div><b>${lv[l]}</b></div>`).join("")}</div>
+        <div class="hbar__track"><div class="hbar__fill" style="width:${screened ? (lv[l] / screened) * 100 : 0}%"></div></div><b>${lv[l]}</b></div>`).join("")}</div>
     </div>`;
 }
 
@@ -91,7 +91,7 @@ function users(body) {
   body.innerHTML = `<div class="card"><h3>Пользователи</h3><div class="table-scroll"><table class="tbl">
     <thead><tr><th>ФИО</th><th>Роль</th><th>Школа</th><th>Email</th><th>Статус</th><th></th></tr></thead><tbody>
     ${STATE.users.map((x) => {
-      const school = x.school || (x.childId ? (STATE.students.find((s) => s.id === x.childId) || {}).school : "") || "—";
+      const school = x.school || "—";
       const act = x.role === "admin" ? "" : x.status === "blocked"
         ? `<button class="btn btn--sm btn--outline" data-on="${x.id}">Включить</button>`
         : `<button class="btn btn--sm btn--outline" data-off="${x.id}">Отключить</button>`;
@@ -104,14 +104,15 @@ function users(body) {
 
 function schools(body) {
   body.innerHTML = `<div class="card"><h3>Школы</h3><div class="table-scroll"><table class="tbl">
-    <thead><tr><th>Школа</th><th>Медработники</th><th>Ученики</th><th>Карты заполнены</th><th>3 уровень</th></tr></thead><tbody>
+    <thead><tr><th>Школа</th><th>Медработники</th><th>Классов в отчётах</th><th>Охват скрининга</th><th>3 уровень</th></tr></thead><tbody>
     ${SCHOOLS.map((sc) => {
-      const st = STATE.students.filter((s) => s.school === sc), f = st.filter((s) => s.card);
+      const reps = (STATE.reports || []).filter((r) => r.school === sc);
+      const enrolled = reps.reduce((a, r) => a + r.enrolled, 0), screened = reps.reduce((a, r) => a + r.screened, 0);
       const med = STATE.users.filter((x) => x.role === "medic" && x.school === sc && x.status === "active").length;
-      const pct = st.length ? Math.round((f.length / st.length) * 100) : 0;
-      return `<tr><td>${sc}</td><td>${med}</td><td>${st.length}</td>
-        <td><div class="progress"><div class="hbar__track"><div class="hbar__fill" style="width:${pct}%"></div></div><span>${f.length} (${pct}%)</span></div></td>
-        <td>${f.filter((s) => riskLevel(s.card) === 3).length}</td></tr>`;
+      const pct = enrolled ? Math.round((screened / enrolled) * 100) : 0;
+      return `<tr><td>${sc}</td><td>${med}</td><td>${reps.length}</td>
+        <td><div class="progress"><div class="hbar__track"><div class="hbar__fill" style="width:${pct}%"></div></div><span>${screened} из ${enrolled} (${pct}%)</span></div></td>
+        <td>${sumLevels(reps)[3]}</td></tr>`;
     }).join("")}</tbody></table></div></div>`;
 }
 
