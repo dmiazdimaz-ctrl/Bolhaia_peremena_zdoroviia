@@ -60,19 +60,21 @@ nav.addEventListener("click", (e) => { if (e.target.tagName === "A") nav.classLi
 // Новости
 const newsList = $("#newsList");
 function renderNews(filter) {
-  const limit = Number(newsList.dataset.limit) || NEWS.length;
-  newsList.innerHTML = NEWS.filter((n) => filter === "all" || n.cat === filter).slice(0, limit).map((n) => `
+  // Новости, добавленные администратором (демо, из auth.js), идут первыми.
+  const items = [...(typeof STATE !== "undefined" ? STATE.news.map((n) => ({ ...n, title: esc(n.title), text: esc(n.text), url: esc(n.url) })) : []), ...NEWS];
+  const limit = Number(newsList.dataset.limit) || items.length;
+  newsList.innerHTML = items.filter((n) => filter === "all" || n.cat === filter).slice(0, limit).map((n) => `
     <article class="post">
       <div class="post__img">${n.src}</div>
       <div class="post__body">
         <div class="post__meta"><span class="tag">${n.tag}</span>${n.date ? `<time>${n.date}</time>` : ""}</div>
         <h4>${n.title}</h4>
         <p>${n.text}</p>
-        <a href="${n.url}" target="_blank" rel="noopener">Читать в источнике →</a>
+        ${/^https?:/.test(n.url) ? `<a href="${n.url}" target="_blank" rel="noopener">Читать в источнике →</a>` : ""}
       </div>
     </article>`).join("");
 }
-document.querySelectorAll(".chip").forEach((c) => c.addEventListener("click", () => {
+document.querySelectorAll("[data-f]").forEach((c) => c.addEventListener("click", () => {
   document.querySelectorAll(".chip").forEach((x) => x.classList.remove("is-active"));
   c.classList.add("is-active");
   renderNews(c.dataset.f);
