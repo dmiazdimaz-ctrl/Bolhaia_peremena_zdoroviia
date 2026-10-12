@@ -1,6 +1,7 @@
-// Демо-авторизация прототипа. Сервера нет: пользователи, ученики, заявки и новости
-// хранятся в localStorage этого браузера. Пароли не сохраняются.
-const STORE_KEY = "bpz-demo-v2";
+// Демо-авторизация прототипа. Сервера нет: пользователи, сводные отчёты по классам,
+// заявки и новости хранятся в localStorage этого браузера. Пароли не сохраняются.
+// Персональных данных детей нет: только количества по классам.
+const STORE_KEY = "bpz-demo-v3";
 
 const SCHOOLS = ["Школа № 1", "Гимназия № 2", "Лицей № 3", "Школа № 4", "Школа № 5"];
 
@@ -22,8 +23,11 @@ function riskLevel(card) {
   return n >= 2 ? 2 : n;
 }
 
+// Сумма уровней риска по набору отчётов: [нет, 1, 2, 3].
+const sumLevels = (reports) => reports.reduce((a, x) => a.map((v, i) => v + x.levels[i]), [0, 0, 0, 0]);
+
 function seed() {
-  const s = (id, name, age, cls, card) => ({ id, name, age, cls, school: "Школа № 1", card });
+  const r = (id, cls, age, enrolled, screened, l0, l1, l2, l3, date) => ({ id, school: "Школа № 1", cls, age, enrolled, screened, levels: [l0, l1, l2, l3], date });
   return {
     session: null,
     users: [
@@ -31,14 +35,10 @@ function seed() {
       { id: "u-med", role: "medic", name: "Петрова Ольга Ивановна", email: "medic@demo", school: "Школа № 1", position: "Медсестра", status: "active" },
       { id: "u-med2", role: "medic", name: "Смирнова Елена Павловна", email: "smirnova@demo", school: "Лицей № 3", position: "Фельдшер", status: "pending" },
     ],
-    students: [
-      s("s-1", "Иванов Миша", 8, "2А", { outdoor: true, gadgets: true, parents: false, eyeMovement: false, malinovsky: false, date: "14.10.2026" }),
-      s("s-2", "Кузнецова Даша", 8, "2А", { outdoor: false, gadgets: false, parents: false, eyeMovement: false, malinovsky: false, date: "14.10.2026" }),
-      s("s-3", "Орлов Артём", 8, "2А", { outdoor: false, gadgets: true, parents: false, eyeMovement: false, malinovsky: false, date: "15.10.2026" }),
-      s("s-4", "Соколова Вера", 8, "2Б", { outdoor: true, gadgets: true, parents: true, eyeMovement: false, malinovsky: true, date: "15.10.2026" }),
-      s("s-5", "Морозов Илья", 8, "2Б", null),
-      s("s-6", "Волкова Лиза", 9, "3А", null),
-      s("s-7", "Зайцев Кирилл", 9, "3А", null),
+    reports: [
+      r("c-1", "2А", 8, 27, 25, 15, 6, 3, 1, "14.10.2026"),
+      r("c-2", "2Б", 8, 26, 24, 13, 7, 2, 2, "15.10.2026"),
+      r("c-3", "3А", 9, 28, 12, 8, 3, 1, 0, "05.11.2026"),
     ],
     news: [],
     requests: [

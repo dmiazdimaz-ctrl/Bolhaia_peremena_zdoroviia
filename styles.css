@@ -284,7 +284,8 @@ h3 { font-size: 20px; color: var(--accent-text); }
 .cab-head { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
 .cab-head h2 { margin: 0; }
 .cab-head .muted { margin: 4px 0 0; }
-.cab-medic { display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; align-items: start; }
+.cab-medic { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+.cab-reports { margin-bottom: 24px; }
 .card--alert { border-color: var(--crit-fg); background: var(--crit-bg); }
 .empty { max-width: 560px; display: flex; flex-direction: column; gap: 8px; }
 .empty h3, .empty p { margin: 0; }
@@ -322,7 +323,7 @@ h3 { font-size: 20px; color: var(--accent-text); }
 .news-admin .muted { margin: 0; font-size: 13px; }
 textarea { resize: vertical; }
 
-@media (max-width: 900px) { .cab-medic { grid-template-columns: 1fr; } }
+@media (max-width: 900px) { .cab-medic { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 560px) { .fields, .roles { grid-template-columns: 1fr; } }
 
 /* request form + CTA */
@@ -337,3 +338,17 @@ textarea { resize: vertical; }
 #adminBody { display: flex; flex-direction: column; gap: 24px; }
 #adminBody > .grid2 { margin: 0; }
 .req-status { font: inherit; font-size: 13px; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); }
+
+/* medic: class reports */
+.fields--levels { grid-template-columns: 1fr 1fr; }
+.fields--levels .field span { font-size: 13px; }
+.num { display: inline-grid; place-items: center; min-width: 28px; padding: 2px 6px; border-radius: 6px; font-weight: 600; font-size: 13px; }
+.num.risk--0 { background: var(--ok-bg); color: var(--ok-fg); }
+.num.risk--1 { background: var(--tag-bg); color: var(--teal-d); }
+.num.risk--2 { background: var(--warn-bg); color: var(--warn-fg); }
+.num.risk--3 { background: var(--crit-bg); color: var(--crit-fg); }
+.tbl tfoot td { font-weight: 600; border-bottom: 0; border-top: 2px solid var(--line); }
+.tbl tbody tr.is-active { background: var(--tint); }
+.calc__grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.calc__col { display: flex; flex-direction: column; gap: 12px; }
+.calc__result { margin: 8px 0 0; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
