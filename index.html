@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Большая перемена здоровья</title>
+<meta name="description" content="Межведомственный проект о здоровье школьников Воронежской области: о программе, новости, аналитика.">
+<link rel="icon" href="assets/emblem.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Playfair+Display:ital,wght@1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="partners-bar">
+  <div class="wrap partners-bar__in">
+    <span class="partners-bar__lbl">Партнёры проекта</span>
+    <ul class="partners">
+      <li class="partner"><span class="partner__logo" data-abbr="МЗ"><img src="assets/partners/minzdrav.png" alt="" onerror="this.remove()"></span><span class="partner__name">Министерство здравоохранения<br>Воронежской области</span></li>
+      <li class="partner"><span class="partner__logo" data-abbr="МО"><img src="assets/partners/minobr.png" alt="" onerror="this.remove()"></span><span class="partner__name">Министерство образования<br>Воронежской области</span></li>
+      <li class="partner"><span class="partner__logo" data-abbr="МС"><img src="assets/partners/minsport.png" alt="" onerror="this.remove()"></span><span class="partner__name">Министерство физической культуры<br>и спорта Воронежской области</span></li>
+    </ul>
+  </div>
+</div>
+
+<header class="topbar">
+  <div class="wrap topbar__in">
+    <a href="index.html" class="brand">
+      <img src="assets/emblem.png" alt="" width="44" height="36">
+      <span class="brand__txt"><b>Большая перемена</b><small>здоровья | Воронеж</small></span>
+    </a>
+    <button class="burger" aria-label="Меню" aria-expanded="false">☰</button>
+    <nav class="nav">
+      <a href="about.html">О программе</a>
+      <a href="news.html">Новости</a>
+      <a href="analytics.html">Аналитика</a>
+      <a href="login.html" class="nav__login" data-auth>Войти</a>
+      <a href="request.html" class="nav__cta">Пригласить БПЗ</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap hero__in">
+      <div>
+        <p class="eyebrow">Межведомственный проект · с 2024 года</p>
+        <h1>«Большая <em>перемена</em> здоровья»</h1>
+        <p class="lead">Профилактика школьно-обусловленных заболеваний в школах Воронежской области: зрение, осанка, вес и репродуктивное здоровье подростков.</p>
+        <div class="hero__btns">
+          <a href="about.html" class="btn btn--light">О программе</a>
+          <a href="analytics.html" class="btn btn--ghost">Результаты скрининга</a>
+        </div>
+      </div>
+      <img class="hero__logo" src="assets/logo.png" alt="Логотип «Большая перемена здоровья | Воронеж»">
+    </div>
+  </section>
+
+  <!-- 1. О ПРОГРАММЕ -->
+  <section class="section">
+    <div class="wrap">
+      <div class="section__head">
+        <h2>О <em>программе</em></h2>
+        <a href="about.html" class="more">Подробнее о программе →</a>
+      </div>
+      <p class="intro">Межведомственный проект в школах Воронежской области с 2024 года. Главная задача — не допустить появления и развития заболеваний у школьников.</p>
+      <div class="dirs">
+        <div class="dir dir--main"><b>Зрение</b><span>Скрининг предикторов миопии у детей с хорошим зрением.</span></div>
+        <div class="dir"><b>Осанка</b><span>Профилактика сколиоза.</span></div>
+        <div class="dir"><b>Вес</b><span>Борьба с лишним весом.</span></div>
+        <div class="dir"><b>Репродуктивное здоровье</b><span>Сохранение репродуктивного здоровья подростков.</span></div>
+      </div>
+      <ol class="timeline timeline--short">
+        <li><time>2024</time><b>Старт проекта</b><span>Запуск в школах Воронежской области.</span></li>
+        <li class="is-now"><time>Октябрь 2026</time><b>Скрининг 2026/2027</b><span>Обследования с октября по апрель.</span></li>
+        <li><time>Май 2027</time><b>Отчёт за год</b><span>Итоги учебного года.</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 2. НОВОСТИ -->
+  <section class="section section--tint">
+    <div class="wrap">
+      <div class="section__head">
+        <h2>Новости <em>БПЗ</em></h2>
+        <a href="news.html" class="more">Все новости →</a>
+      </div>
+      <div class="news" id="newsList" data-limit="3"></div>
+    </div>
+  </section>
+
+  <!-- ЗАЯВКА -->
+  <section class="section section--cta">
+    <div class="wrap">
+      <div class="cta">
+        <div>
+          <h2>Хотите, чтобы БПЗ приехала <em>в вашу школу?</em></h2>
+          <p>Оставьте заявку — координатор проекта свяжется с вами и со школой.</p>
+        </div>
+        <a href="request.html" class="btn btn--light">Оставить заявку</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. АНАЛИТИКА -->
+  <section class="section">
+    <div class="wrap">
+      <div class="section__head">
+        <h2><em>Аналитика</em> скрининга</h2>
+        <a href="analytics.html" class="more">Вся аналитика →</a>
+      </div>
+      <p class="note">⚠ Демо-данные: открытой статистики проекта нет.</p>
+      <div class="kpis">
+        <div class="kpi"><span class="kpi__v">48</span><span class="kpi__l">школ участвуют</span></div>
+        <div class="kpi"><span class="kpi__v">3 120</span><span class="kpi__l">детей прошли скрининг</span></div>
+        <div class="kpi"><span class="kpi__v">27%</span><span class="kpi__l">с предикторами миопии</span></div>
+        <div class="kpi"><span class="kpi__v">214</span><span class="kpi__l">направлены к офтальмологу</span></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap footer__in">
+    <div>
+      <img src="assets/emblem.png" alt="" width="56" height="46">
+      <p><b>Большая перемена здоровья | Воронеж</b><br>Межведомственный проект о здоровье школьников</p>
+    </div>
+    <div>
+      <p class="footer__h">Партнёры</p>
+      <p>Министерство здравоохранения Воронежской области<br>Министерство образования Воронежской области<br>Министерство физической культуры и спорта Воронежской области<br>Управление образования и молодёжной политики администрации г. Воронежа<br>Воронежская областная клиническая офтальмологическая больница</p>
+    </div>
+    <div>
+      <p class="footer__h">Родителям</p>
+      <p><a href="https://okob.vrn.ru" target="_blank" rel="noopener">okob.vrn.ru</a> — рекомендации и контакты офтальмологической службы</p>
+    </div>
+  </div>
+</footer>
+
+<script src="auth.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
