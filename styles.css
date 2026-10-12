@@ -359,3 +359,13 @@ textarea { resize: vertical; }
 .prose p { max-width: 68ch; }
 .footer__links { font-size: 13px; }
 button:disabled { opacity: .6; cursor: progress; }
+
+/* admin roles */
+.pw-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.pw-row input { flex: 1; min-width: 160px; font-family: ui-monospace, monospace; }
+.roles-list { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 10px; font-size: 14px; }
+.reset-box { margin-top: 16px; padding: 14px; border-radius: 10px; background: var(--tint); display: flex; flex-direction: column; gap: 8px; }
+.reset-box p { margin: 0; }
+#resetBox .form__ok { margin-top: 16px; }
+.tbl td.is-warn { color: var(--crit-fg); font-weight: 600; }
+.tbl select:disabled { opacity: .6; }

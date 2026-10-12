@@ -85,17 +85,47 @@ function start_session(): void {
     $_SESSION['seen'] = time();
 }
 
-function current_admin(): ?array {
-    start_session();
-    return isset($_SESSION['admin_id']) ? ['id' => $_SESSION['admin_id'], 'login' => $_SESSION['admin_login']] : null;
+// Роли и права. Проверяются на сервере при каждом запросе; интерфейс лишь прячет недоступное.
+const ROLES = ['superadmin', 'coordinator', 'editor', 'viewer'];
+const PERMS = [
+    'requests.view'   => ['superadmin', 'coordinator'],
+    'requests.edit'   => ['superadmin', 'coordinator'],
+    'requests.delete' => ['superadmin'],
+    'summary.view'    => ['superadmin', 'coordinator', 'editor', 'viewer'],
+    'news.manage'     => ['superadmin', 'coordinator', 'editor'],
+    'users.manage'    => ['superadmin'],
+    'audit.view'      => ['superadmin'],
+];
+
+function can(string $role, string $perm): bool {
+    return in_array($role, PERMS[$perm] ?? [], true);
 }
 
-// Для изменяющих запросов администратора: сессия + CSRF-токен в заголовке.
-function require_admin(bool $write = false): array {
+// Текущий пользователь берётся из БД на каждый запрос: отключение и смена роли действуют сразу.
+function current_admin(): ?array {
+    start_session();
+    if (!isset($_SESSION['admin_id'])) return null;
+    $st = db()->prepare('SELECT id, login, name, role, active FROM admins WHERE id = ?');
+    $st->execute([$_SESSION['admin_id']]);
+    $a = $st->fetch();
+    if (!$a || !(int)$a['active']) { $_SESSION = []; return null; }
+    $a['id'] = (int)$a['id'];
+    unset($a['active']);
+    return $a;
+}
+
+// Для изменяющих запросов: сессия + CSRF-токен в заголовке; при $perm — ещё и право роли.
+function require_admin(bool $write = false, ?string $perm = null): array {
     $a = current_admin();
     if (!$a) fail(401, 'Нужно войти.');
     if ($write && !hash_equals($_SESSION['csrf'] ?? '', $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '')) fail(403, 'Сессия устарела. Обновите страницу.');
+    if ($perm && !can($a['role'], $perm)) fail(403, 'Недостаточно прав.');
     return $a;
+}
+
+function audit(?array $admin, string $action, string $details = ''): void {
+    db()->prepare('INSERT INTO audit (created_at, admin_login, action, details) VALUES (?, ?, ?, ?)')
+        ->execute([now(), $admin['login'] ?? '—', $action, mb_substr($details, 0, 500)]);
 }
 
 function cleanup_old_requests(): void {

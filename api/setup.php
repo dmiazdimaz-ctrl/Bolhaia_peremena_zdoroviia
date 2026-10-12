@@ -15,20 +15,33 @@ foreach ([
        ages VARCHAR(100) NOT NULL DEFAULT '', comment VARCHAR(1000) NOT NULL DEFAULT '', status VARCHAR(20) NOT NULL DEFAULT 'new')$tail",
     "CREATE TABLE IF NOT EXISTS news (id $id, created_at DATETIME NOT NULL, cat VARCHAR(20) NOT NULL, title VARCHAR(200) NOT NULL,
        text VARCHAR(1000) NOT NULL DEFAULT '', url VARCHAR(500) NOT NULL DEFAULT '')$tail",
-    "CREATE TABLE IF NOT EXISTS admins (id $id, login VARCHAR(60) NOT NULL UNIQUE, pass_hash VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL)$tail",
+    "CREATE TABLE IF NOT EXISTS admins (id $id, login VARCHAR(60) NOT NULL UNIQUE, pass_hash VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL,
+       name VARCHAR(100) NOT NULL DEFAULT '', role VARCHAR(20) NOT NULL DEFAULT 'viewer', active SMALLINT NOT NULL DEFAULT 1)$tail",
+    "CREATE TABLE IF NOT EXISTS audit (id $id, created_at DATETIME NOT NULL, admin_login VARCHAR(60) NOT NULL, action VARCHAR(40) NOT NULL,
+       details VARCHAR(500) NOT NULL DEFAULT '')$tail",
     "CREATE TABLE IF NOT EXISTS hits (id $id, kind VARCHAR(20) NOT NULL, client CHAR(64) NOT NULL, created_at DATETIME NOT NULL)$tail",
 ] as $sql) $pdo->exec($sql);
+
+// Миграция базы, созданной до появления ролей: добавить колонки, прежних админов сделать главными.
+try { $pdo->query('SELECT role FROM admins LIMIT 1'); } catch (PDOException $e) {
+    $pdo->exec("ALTER TABLE admins ADD COLUMN name VARCHAR(100) NOT NULL DEFAULT ''");
+    $pdo->exec("ALTER TABLE admins ADD COLUMN role VARCHAR(20) NOT NULL DEFAULT 'viewer'");
+    $pdo->exec("ALTER TABLE admins ADD COLUMN active SMALLINT NOT NULL DEFAULT 1");
+    $pdo->exec("UPDATE admins SET role = 'superadmin'");
+}
 
 $hasAdmin = (int)$pdo->query('SELECT COUNT(*) FROM admins')->fetchColumn() > 0;
 $msg = '';
 if (!$hasAdmin && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $login = trim((string)($_POST['login'] ?? ''));
+    $name = mb_substr(trim((string)($_POST['name'] ?? '')), 0, 100);
     $pass = (string)($_POST['password'] ?? '');
     if (!preg_match('/^[a-zA-Z0-9_.-]{3,60}$/', $login)) $msg = 'Логин: 3–60 латинских букв, цифр, точек, дефисов.';
     elseif (mb_strlen($pass) < 12) $msg = 'Пароль должен быть не короче 12 символов.';
     else {
-        $pdo->prepare('INSERT INTO admins (login, pass_hash, created_at) VALUES (?, ?, ?)')
-            ->execute([$login, password_hash($pass, PASSWORD_DEFAULT), now()]);
+        $pdo->prepare('INSERT INTO admins (login, pass_hash, created_at, name, role, active) VALUES (?, ?, ?, ?, ?, 1)')
+            ->execute([$login, password_hash($pass, PASSWORD_DEFAULT), now(), $name, 'superadmin']);
+        audit(['login' => $login], 'setup', 'Создан главный администратор');
         $hasAdmin = true;
         $msg = 'ok';
     }
@@ -45,9 +58,10 @@ label{display:block;margin:12px 0}input{width:100%;padding:8px;font:inherit;box-
 <?php elseif ($hasAdmin): ?>
   <p class="ok">Сайт уже настроен. Удалите файл api/setup.php с хостинга.</p>
 <?php else: ?>
-  <p>Таблицы созданы. Создайте учётную запись координатора.</p>
+  <p>Таблицы созданы. Создайте учётную запись главного администратора — он сможет добавлять остальных пользователей.</p>
   <?php if ($msg): ?><p class="err"><?= htmlspecialchars($msg) ?></p><?php endif; ?>
   <form method="post">
+    <label>Имя <input name="name" autocomplete="name"></label>
     <label>Логин <input name="login" required autocomplete="username"></label>
     <label>Пароль (от 12 символов) <input name="password" type="password" minlength="12" required autocomplete="new-password"></label>
     <button type="submit">Создать</button>
