@@ -1,0 +1,9 @@
+# Закрыть служебные файлы от прямого доступа
+<FilesMatch "^(config\.php|config\.sample\.php|lib\.php)$">
+  Require all denied
+</FilesMatch>
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^data/ - [F,L]
+</IfModule>
+Options -Indexes
