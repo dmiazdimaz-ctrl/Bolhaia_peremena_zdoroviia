@@ -352,3 +352,10 @@ textarea { resize: vertical; }
 .calc__grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
 .calc__col { display: flex; flex-direction: column; gap: 12px; }
 .calc__result { margin: 8px 0 0; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+/* honeypot, policy, footer links */
+.hp { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+.prose h3 { margin-top: 28px; }
+.prose p { max-width: 68ch; }
+.footer__links { font-size: 13px; }
+button:disabled { opacity: .6; cursor: progress; }

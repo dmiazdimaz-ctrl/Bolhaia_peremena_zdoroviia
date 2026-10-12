@@ -57,13 +57,13 @@ burger.addEventListener("click", () => {
 });
 nav.addEventListener("click", (e) => { if (e.target.tagName === "A") nav.classList.remove("is-open"); });
 
-// Новости
+// Новости: сначала добавленные координатором (из store.js), затем публикации СМИ.
 const newsList = $("#newsList");
+const CAT_TAG = { project: "О проекте", eyes: "Зрение" };
+let NEWS_ALL = NEWS;
 function renderNews(filter) {
-  // Новости, добавленные администратором (демо, из auth.js), идут первыми.
-  const items = [...(typeof STATE !== "undefined" ? STATE.news.map((n) => ({ ...n, title: esc(n.title), text: esc(n.text), url: esc(n.url) })) : []), ...NEWS];
-  const limit = Number(newsList.dataset.limit) || items.length;
-  newsList.innerHTML = items.filter((n) => filter === "all" || n.cat === filter).slice(0, limit).map((n) => `
+  const limit = Number(newsList.dataset.limit) || NEWS_ALL.length;
+  newsList.innerHTML = NEWS_ALL.filter((n) => filter === "all" || n.cat === filter).slice(0, limit).map((n) => `
     <article class="post">
       <div class="post__img">${n.src}</div>
       <div class="post__body">
@@ -79,7 +79,16 @@ document.querySelectorAll("[data-f]").forEach((c) => c.addEventListener("click",
   c.classList.add("is-active");
   renderNews(c.dataset.f);
 }));
-if (newsList) renderNews("all");
+if (newsList) {
+  renderNews("all");
+  if (typeof Store !== "undefined") Store.listNews().then((own) => {
+    if (!own.length) return;
+    NEWS_ALL = [...own.map((n) => ({ cat: n.cat, tag: CAT_TAG[n.cat] || "О проекте", src: "БПЗ", date: fmtDate(n.created_at),
+      title: esc(n.title), text: esc(n.text), url: esc(n.url) })), ...NEWS];
+    const active = document.querySelector("[data-f].is-active");
+    renderNews(active ? active.dataset.f : "all");
+  });
+}
 
 if ($("#ageBars")) {
   // Охват по возрастам

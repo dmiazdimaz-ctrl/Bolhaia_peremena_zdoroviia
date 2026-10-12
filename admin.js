@@ -1,149 +1,169 @@
-// Панель администратора (демо).
-const admin = document.getElementById("admin");
-const ROLE_NAMES = { parent: "Родитель", medic: "Медработник", admin: "Администратор" };
-const STATUS_NAMES = { active: "Активен", pending: "На проверке", blocked: "Отключён" };
+// Вход координатора и панель администратора: заявки родителей и новости.
 const REQ_STATUS = { new: "Новая", work: "В работе", planned: "Выезд запланирован", done: "Проведено", rejected: "Отклонена" };
-let adminTab = "summary";
+const CATS = { project: "О проекте", eyes: "Зрение" };
+
+// ---------- Вход ----------
+const loginForm = document.getElementById("loginForm");
+if (loginForm) {
+  Store.isDemo().then((d) => { document.getElementById("loginDemo").hidden = !d; });
+  Store.me().then((a) => { if (a) location.href = "admin.html"; }).catch(() => {});
+  loginForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const err = document.getElementById("loginError");
+    err.hidden = true;
+    try {
+      await Store.login(document.getElementById("loginName").value.trim(), document.getElementById("loginPass").value);
+      location.href = "admin.html";
+    } catch (ex) { err.textContent = ex.message; err.hidden = false; }
+  });
+}
+
+// ---------- Панель ----------
+const admin = document.getElementById("admin");
+let adminTab = "requests";
 try { adminTab = sessionStorage.getItem("bpz-admin-tab") || adminTab; } catch (e) {}
+if (admin) boot();
 
-renderAdmin();
-
-function renderAdmin() {
-  const u = currentUser();
-  if (!u || u.role !== "admin") {
-    admin.innerHTML = `<div class="card empty"><h3>Нужны права администратора</h3>
-      <p class="muted">Войдите под учётной записью администратора. В демо — кнопка «Администратор» на странице входа.</p>
+async function boot() {
+  let me = null;
+  try { me = await Store.me(); } catch (ex) { return showError(ex.message); }
+  if (!me) {
+    admin.innerHTML = `<div class="card empty"><h3>Нужно войти</h3><p class="muted">Панель доступна только координаторам проекта.</p>
       <a class="btn btn--primary" href="login.html">Войти</a></div>`;
     return;
   }
-  const pending = STATE.users.filter((x) => x.status === "pending").length;
-  const fresh = (STATE.requests || []).filter((r) => r.status === "new").length;
-  const cnt = (n) => (n ? ` <span class="count">${n}</span>` : "");
-  const tabs = [["summary", "Сводка"], ["visits", "Заявки родителей" + cnt(fresh)], ["requests", "Медработники" + cnt(pending)], ["users", "Пользователи"], ["schools", "Школы"], ["news", "Новости"]];
-  admin.innerHTML = `<div class="cab-head"><div><p class="eyebrow eyebrow--teal">Администратор</p><h2>${esc(u.name)}</h2></div>
+  render(me);
+}
+
+function showError(text) {
+  admin.innerHTML = `<div class="card card--alert"><h3>Не удалось загрузить данные</h3><p>${esc(text)}</p></div>`;
+}
+
+async function render(me) {
+  let requests, news;
+  try { [requests, news] = await Promise.all([Store.requests(), Store.listNews()]); } catch (ex) { return showError(ex.message); }
+  const fresh = requests.filter((r) => r.status === "new").length;
+  const tabs = [["requests", "Заявки родителей" + (fresh ? ` <span class="count">${fresh}</span>` : "")], ["summary", "Сводка"], ["news", "Новости"], ["account", "Учётная запись"]];
+  admin.innerHTML = `<div class="cab-head"><div><p class="eyebrow eyebrow--teal">Координатор</p><h2>${esc(me.login)}</h2></div>
       <button class="btn btn--outline" id="logout">Выйти</button></div>
     <div class="chips" role="tablist">${tabs.map(([k, t]) => `<button class="chip ${k === adminTab ? "is-active" : ""}" role="tab" aria-selected="${k === adminTab}" data-tab="${k}">${t}</button>`).join("")}</div>
     <div id="adminBody"></div>`;
-  document.getElementById("logout").addEventListener("click", signOut);
+  document.getElementById("logout").addEventListener("click", async () => { await Store.logout().catch(() => {}); location.href = "index.html"; });
   admin.querySelectorAll("[data-tab]").forEach((b) => b.addEventListener("click", () => {
     adminTab = b.dataset.tab;
     try { sessionStorage.setItem("bpz-admin-tab", adminTab); } catch (e) {}
-    renderAdmin();
+    render(me);
   }));
   const body = document.getElementById("adminBody");
-  (({ summary, visits, requests, users, schools, news })[adminTab] || summary)(body);
+  const views = { requests: viewRequests, summary: viewSummary, news: viewNews, account: viewAccount };
+  (views[adminTab] || viewRequests)(body, { requests, news, me, refresh: () => render(me) });
 }
 
-function summary(body) {
-  const by = (r) => STATE.users.filter((x) => x.role === r).length;
-  const reqs = STATE.requests || [];
-  const reps = STATE.reports || [], lv = sumLevels(reps);
-  const screened = reps.reduce((a, r) => a + r.screened, 0);
-  body.innerHTML = `<div class="kpis">
-      <div class="kpi"><span class="kpi__v">${reqs.length}</span><span class="kpi__l">заявок от родителей</span></div>
-      <div class="kpi"><span class="kpi__v">${by("medic")}</span><span class="kpi__l">медработников</span></div>
-      <div class="kpi"><span class="kpi__v">${screened}</span><span class="kpi__l">детей обследовано</span></div>
-      <div class="kpi"><span class="kpi__v">${lv[3]}</span><span class="kpi__l">направлены к офтальмологу</span></div>
-    </div>
-    <div class="card"><h3>Группы риска по отчётам школ</h3>
-      <div class="hbars">${[0, 1, 2, 3].map((l) => `<div class="hbar"><span>${RISK_LEVELS[l].label}</span>
-        <div class="hbar__track"><div class="hbar__fill" style="width:${screened ? (lv[l] / screened) * 100 : 0}%"></div></div><b>${lv[l]}</b></div>`).join("")}</div>
-    </div>`;
+// Группировка заявок по школе: куда ехать в первую очередь.
+function bySchool(requests) {
+  const m = {};
+  requests.forEach((r) => {
+    const k = (r.school.trim() + "|" + r.district).toLowerCase();
+    const g = (m[k] = m[k] || { school: r.school, district: r.district, n: 0, open: 0 });
+    g.n++; if (r.status === "new" || r.status === "work") g.open++;
+  });
+  return Object.values(m).sort((a, b) => b.n - a.n);
 }
 
-function visits(body) {
-  const reqs = STATE.requests || [];
-  if (!reqs.length) { body.innerHTML = `<div class="card empty"><h3>Заявок пока нет</h3><p class="muted">Здесь появятся заявки родителей со страницы «Пригласить БПЗ».</p></div>`; return; }
-  // Сводка по школам: где больше заявок, туда ехать в первую очередь.
-  const bySchool = {};
-  reqs.forEach((r) => { const k = (r.school.trim() + "|" + r.district).toLowerCase(); (bySchool[k] = bySchool[k] || { school: r.school, district: r.district, n: 0 }).n++; });
-  const top = Object.values(bySchool).sort((a, b) => b.n - a.n);
-  body.innerHTML = `<div class="card"><h3>Школы по числу заявок</h3><div class="table-scroll"><table class="tbl">
-      <thead><tr><th>Школа</th><th>Район</th><th>Заявок</th></tr></thead><tbody>
-      ${top.map((t) => `<tr><td>${esc(t.school)}</td><td>${esc(t.district)}</td><td><b>${t.n}</b></td></tr>`).join("")}</tbody></table></div></div>
-    <div class="card"><h3>Все заявки</h3><div class="table-scroll"><table class="tbl">
-      <thead><tr><th>Дата</th><th>Школа</th><th>Возраст детей</th><th>Контакт</th><th>Комментарий</th><th>Статус</th></tr></thead><tbody>
-      ${reqs.map((r) => `<tr><td>${esc(r.date)}</td><td>${esc(r.school)}<br><span class="muted">${esc(r.district)}</span></td>
-        <td>${esc((r.ages || []).join(", ") || "—")}</td><td>${esc(r.name)}<br><span class="muted">${esc(r.phone)}${r.email ? "<br>" + esc(r.email) : ""}</span></td>
-        <td>${esc(r.comment || "—")}</td>
-        <td><select class="req-status" data-req="${r.id}" aria-label="Статус заявки">${Object.entries(REQ_STATUS).map(([k, t]) => `<option value="${k}" ${k === r.status ? "selected" : ""}>${t}</option>`).join("")}</select></td></tr>`).join("")}
-      </tbody></table></div></div>`;
-  body.querySelectorAll("[data-req]").forEach((sel) => sel.addEventListener("change", () => {
-    reqs.find((r) => r.id === sel.dataset.req).status = sel.value; commit(); renderAdmin();
+function viewRequests(body, { requests, refresh }) {
+  if (!requests.length) {
+    body.innerHTML = `<div class="card empty"><h3>Заявок пока нет</h3><p class="muted">Здесь появятся заявки родителей со страницы «Пригласить БПЗ».</p></div>`;
+    return;
+  }
+  body.innerHTML = `<div class="card"><h3>Все заявки</h3><div class="table-scroll"><table class="tbl">
+    <thead><tr><th>Дата</th><th>Школа</th><th>Возраст детей</th><th>Контакт</th><th>Комментарий</th><th>Статус</th><th></th></tr></thead><tbody>
+    ${requests.map((r) => `<tr><td>${fmtDate(r.created_at)}</td><td>${esc(r.school)}<br><span class="muted">${esc(r.district)}</span></td>
+      <td>${esc(r.ages || "—")}</td>
+      <td>${esc(r.name)}<br><a href="tel:${esc(r.phone.replace(/[^\d+]/g, ""))}">${esc(r.phone)}</a>${r.email ? `<br><span class="muted">${esc(r.email)}</span>` : ""}</td>
+      <td>${esc(r.comment || "—")}</td>
+      <td><select class="req-status" data-req="${r.id}" aria-label="Статус заявки">${Object.entries(REQ_STATUS).map(([k, t]) => `<option value="${k}" ${k === r.status ? "selected" : ""}>${t}</option>`).join("")}</select></td>
+      <td class="tbl__act"><button class="btn btn--sm btn--outline" data-del="${r.id}" aria-label="Удалить заявку">✕</button></td></tr>`).join("")}
+    </tbody></table></div></div>`;
+  body.querySelectorAll("[data-req]").forEach((sel) => sel.addEventListener("change", async () => {
+    try { await Store.setStatus(Number(sel.dataset.req), sel.value); refresh(); } catch (ex) { alertRow(sel, ex.message); }
+  }));
+  body.querySelectorAll("[data-del]").forEach((b) => b.addEventListener("click", async () => {
+    if (!b.dataset.confirm) { b.dataset.confirm = "1"; b.textContent = "Удалить?"; return; }
+    try { await Store.deleteRequest(Number(b.dataset.del)); refresh(); } catch (ex) { alertRow(b, ex.message); }
   }));
 }
 
-function requests(body) {
-  const list = STATE.users.filter((x) => x.status === "pending");
-  body.innerHTML = list.length ? `<div class="card"><h3>Медработники на проверке</h3><div class="table-scroll"><table class="tbl">
-      <thead><tr><th>ФИО</th><th>Школа</th><th>Должность</th><th>Email</th><th></th></tr></thead><tbody>
-      ${list.map((x) => `<tr><td>${esc(x.name)}</td><td>${esc(x.school)}</td><td>${esc(x.position)}</td><td>${esc(x.email)}</td>
-        <td class="tbl__act"><button class="btn btn--sm btn--primary" data-approve="${x.id}">Одобрить</button><button class="btn btn--sm btn--outline" data-reject="${x.id}">Отклонить</button></td></tr>`).join("")}
-      </tbody></table></div></div>`
-    : `<div class="card empty"><h3>Новых заявок нет</h3><p class="muted">Здесь появятся медработники, которые зарегистрировались и ждут доступа.</p></div>`;
-  body.querySelectorAll("[data-approve]").forEach((b) => b.addEventListener("click", () => setStatus(b.dataset.approve, "active")));
-  body.querySelectorAll("[data-reject]").forEach((b) => b.addEventListener("click", () => setStatus(b.dataset.reject, "blocked")));
+function alertRow(el, text) {
+  const td = el.closest("td");
+  td.insertAdjacentHTML("beforeend", `<p class="form__error">${esc(text)}</p>`);
 }
 
-function setStatus(id, status) { STATE.users.find((x) => x.id === id).status = status; commit(); renderAdmin(); }
-
-function users(body) {
-  body.innerHTML = `<div class="card"><h3>Пользователи</h3><div class="table-scroll"><table class="tbl">
-    <thead><tr><th>ФИО</th><th>Роль</th><th>Школа</th><th>Email</th><th>Статус</th><th></th></tr></thead><tbody>
-    ${STATE.users.map((x) => {
-      const school = x.school || "—";
-      const act = x.role === "admin" ? "" : x.status === "blocked"
-        ? `<button class="btn btn--sm btn--outline" data-on="${x.id}">Включить</button>`
-        : `<button class="btn btn--sm btn--outline" data-off="${x.id}">Отключить</button>`;
-      return `<tr><td>${esc(x.name)}</td><td>${ROLE_NAMES[x.role]}</td><td>${esc(school)}</td><td>${esc(x.email)}</td>
-        <td><span class="status status--${x.status}">${STATUS_NAMES[x.status]}</span></td><td class="tbl__act">${act}</td></tr>`;
-    }).join("")}</tbody></table></div></div>`;
-  body.querySelectorAll("[data-on]").forEach((b) => b.addEventListener("click", () => setStatus(b.dataset.on, "active")));
-  body.querySelectorAll("[data-off]").forEach((b) => b.addEventListener("click", () => setStatus(b.dataset.off, "blocked")));
+function viewSummary(body, { requests }) {
+  const count = (s) => requests.filter((r) => r.status === s).length;
+  const schools = bySchool(requests);
+  body.innerHTML = `<div class="kpis">
+      <div class="kpi"><span class="kpi__v">${requests.length}</span><span class="kpi__l">всего заявок</span></div>
+      <div class="kpi"><span class="kpi__v">${count("new")}</span><span class="kpi__l">новых</span></div>
+      <div class="kpi"><span class="kpi__v">${schools.length}</span><span class="kpi__l">школ в заявках</span></div>
+      <div class="kpi"><span class="kpi__v">${count("planned") + count("done")}</span><span class="kpi__l">выездов запланировано и проведено</span></div>
+    </div>
+    <div class="card"><h3>Школы по числу заявок</h3>${schools.length ? `<div class="table-scroll"><table class="tbl">
+      <thead><tr><th>Школа</th><th>Район</th><th>Заявок</th><th>Ждут ответа</th></tr></thead><tbody>
+      ${schools.map((t) => `<tr><td>${esc(t.school)}</td><td>${esc(t.district)}</td><td><b>${t.n}</b></td><td>${t.open}</td></tr>`).join("")}</tbody></table></div>`
+      : `<p class="muted">Заявок пока нет.</p>`}</div>`;
 }
 
-function schools(body) {
-  body.innerHTML = `<div class="card"><h3>Школы</h3><div class="table-scroll"><table class="tbl">
-    <thead><tr><th>Школа</th><th>Медработники</th><th>Классов в отчётах</th><th>Охват скрининга</th><th>3 уровень</th></tr></thead><tbody>
-    ${SCHOOLS.map((sc) => {
-      const reps = (STATE.reports || []).filter((r) => r.school === sc);
-      const enrolled = reps.reduce((a, r) => a + r.enrolled, 0), screened = reps.reduce((a, r) => a + r.screened, 0);
-      const med = STATE.users.filter((x) => x.role === "medic" && x.school === sc && x.status === "active").length;
-      const pct = enrolled ? Math.round((screened / enrolled) * 100) : 0;
-      return `<tr><td>${sc}</td><td>${med}</td><td>${reps.length}</td>
-        <td><div class="progress"><div class="hbar__track"><div class="hbar__fill" style="width:${pct}%"></div></div><span>${screened} из ${enrolled} (${pct}%)</span></div></td>
-        <td>${sumLevels(reps)[3]}</td></tr>`;
-    }).join("")}</tbody></table></div></div>`;
-}
-
-function news(body) {
+function viewNews(body, { news, refresh }) {
   body.innerHTML = `<div class="grid2 grid2--top">
     <form class="card form" id="newsForm" novalidate>
       <h3>Добавить новость</h3>
       <div class="fields fields--one">
-        <label class="field"><span>Заголовок</span><input id="nTitle" required></label>
-        <label class="field"><span>Рубрика</span><select id="nCat"><option value="project">О проекте</option><option value="eyes">Зрение</option></select></label>
-        <label class="field"><span>Краткий текст</span><textarea id="nText" rows="3"></textarea></label>
+        <label class="field"><span>Заголовок</span><input id="nTitle" maxlength="200" required></label>
+        <label class="field"><span>Рубрика</span><select id="nCat">${Object.entries(CATS).map(([k, t]) => `<option value="${k}">${t}</option>`).join("")}</select></label>
+        <label class="field"><span>Краткий текст</span><textarea id="nText" rows="3" maxlength="1000"></textarea></label>
         <label class="field"><span>Ссылка на источник <small>необязательно</small></span><input id="nUrl" type="url" placeholder="https://"></label>
       </div>
       <p class="form__error" id="nError" hidden></p>
       <button class="btn btn--primary" type="submit">Опубликовать</button>
     </form>
     <div class="card"><h3>Добавленные новости</h3>
-      ${STATE.news.length ? `<ul class="news-admin">${STATE.news.map((n, i) => `<li><div><b>${esc(n.title)}</b><span class="muted">${esc(n.tag)} · ${esc(n.date)}</span></div>
-        <button class="btn btn--sm btn--outline" data-del="${i}">Удалить</button></li>`).join("")}</ul>`
+      ${news.length ? `<ul class="news-admin">${news.map((n) => `<li><div><b>${esc(n.title)}</b><span class="muted">${CATS[n.cat] || ""} · ${fmtDate(n.created_at)}</span></div>
+        <button class="btn btn--sm btn--outline" data-delnews="${n.id}">Удалить</button></li>`).join("")}</ul>`
       : `<p class="muted">Пока пусто. Новости отсюда появляются первыми на главной и на странице «Новости».</p>`}
     </div></div>`;
-  document.getElementById("newsForm").addEventListener("submit", (e) => {
+  document.getElementById("newsForm").addEventListener("submit", async (e) => {
     e.preventDefault();
-    const title = document.getElementById("nTitle").value.trim(), url = document.getElementById("nUrl").value.trim();
     const err = document.getElementById("nError");
-    if (!title) { err.textContent = "Укажите заголовок."; err.hidden = false; return; }
-    if (url && !/^https?:\/\//.test(url)) { err.textContent = "Ссылка должна начинаться с https://"; err.hidden = false; return; }
-    const cat = document.getElementById("nCat").value;
-    STATE.news.unshift({ cat, tag: cat === "eyes" ? "Зрение" : "О проекте", src: "БПЗ", date: today(), title,
-      text: document.getElementById("nText").value.trim(), url: url || "news.html" });
-    commit(); renderAdmin();
+    try {
+      await Store.addNews({ title: document.getElementById("nTitle").value.trim(), cat: document.getElementById("nCat").value,
+        text: document.getElementById("nText").value.trim(), url: document.getElementById("nUrl").value.trim() });
+      refresh();
+    } catch (ex) { err.textContent = ex.message; err.hidden = false; }
   });
-  body.querySelectorAll("[data-del]").forEach((b) => b.addEventListener("click", () => { STATE.news.splice(Number(b.dataset.del), 1); commit(); renderAdmin(); }));
+  body.querySelectorAll("[data-delnews]").forEach((b) => b.addEventListener("click", async () => {
+    if (!b.dataset.confirm) { b.dataset.confirm = "1"; b.textContent = "Точно удалить?"; return; }
+    try { await Store.deleteNews(Number(b.dataset.delnews)); refresh(); } catch (ex) { alertRow(b, ex.message); }
+  }));
+}
+
+function viewAccount(body) {
+  body.innerHTML = `<form class="card form narrow" id="pwForm" novalidate>
+      <h3>Сменить пароль</h3>
+      <div class="fields fields--one">
+        <label class="field"><span>Текущий пароль</span><input id="pwCur" type="password" autocomplete="current-password"></label>
+        <label class="field"><span>Новый пароль <small>не короче 12 символов</small></span><input id="pwNew" type="password" minlength="12" autocomplete="new-password"></label>
+      </div>
+      <p class="form__error" id="pwError" hidden></p>
+      <p class="form__ok" id="pwOk" hidden>Пароль изменён.</p>
+      <button class="btn btn--primary" type="submit">Сохранить</button>
+    </form>`;
+  document.getElementById("pwForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const err = document.getElementById("pwError"), ok = document.getElementById("pwOk");
+    err.hidden = ok.hidden = true;
+    const next = document.getElementById("pwNew").value;
+    if (next.length < 12) { err.textContent = "Новый пароль должен быть не короче 12 символов."; err.hidden = false; return; }
+    try { await Store.changePassword(document.getElementById("pwCur").value, next); ok.hidden = false; e.target.reset(); }
+    catch (ex) { err.textContent = ex.message; err.hidden = false; }
+  });
 }

@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Вход · Большая перемена здоровья</title>
-<meta name="description" content="Вход в личный кабинет.">
+<title>Вход для координатора · Большая перемена здоровья</title>
+<meta name="description" content="Вход в панель администратора проекта.">
 <link rel="icon" href="assets/emblem.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Playfair+Display:ital,wght@1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -34,7 +34,6 @@
       <a href="about.html">О программе</a>
       <a href="news.html">Новости</a>
       <a href="analytics.html">Аналитика</a>
-      <a href="login.html" class="nav__login" data-auth aria-current="page">Войти</a>
       <a href="request.html" class="nav__cta">Пригласить БПЗ</a>
     </nav>
   </div>
@@ -43,31 +42,22 @@
 <main id="top">
   <section class="page-head">
     <div class="wrap">
-      <p class="crumbs"><a href="index.html">Главная</a> / Вход</p>
-      <h1>Вход</h1>
+      <p class="crumbs"><a href="index.html">Главная</a> / Вход для координатора</p>
+      <h1>Вход для <em>координатора</em></h1>
     </div>
   </section>
   <section class="section section--first">
     <div class="wrap narrow">
+      <p class="note" id="loginDemo" hidden>Демо-режим (сервер не подключён): логин <b>admin</b>, пароль <b>demo</b>.</p>
       <form id="loginForm" class="card form" novalidate>
         <div class="fields fields--one">
-          <label class="field"><span>Email</span><input id="loginEmail" type="email" required autocomplete="email"></label>
+          <label class="field"><span>Логин</span><input id="loginName" required autocomplete="username"></label>
           <label class="field"><span>Пароль</span><input id="loginPass" type="password" required autocomplete="current-password"></label>
         </div>
         <p class="form__error" id="loginError" hidden></p>
         <button class="btn btn--primary" type="submit">Войти</button>
-        <p class="muted">Нет аккаунта? <a href="register.html">Зарегистрироваться</a></p>
+        <p class="muted">Учётные записи создаёт администратор сайта. Родителям вход не нужен — чтобы пригласить БПЗ, <a href="request.html">оставьте заявку</a>.</p>
       </form>
-
-      <div class="card demo-login">
-        <h3>Демо-вход</h3>
-        <p class="muted">Посмотреть кабинет без регистрации.</p>
-        <div class="demo-login__btns">
-          <button class="btn btn--outline" data-demo="u-med">Медработник</button>
-          <button class="btn btn--outline" data-demo="u-admin">Администратор</button>
-        </div>
-        <button class="link-btn" id="resetDemo" type="button">Сбросить демо-данные</button>
-      </div>
     </div>
   </section>
 </main>
@@ -85,12 +75,13 @@
     <div>
       <p class="footer__h">Родителям</p>
       <p><a href="https://okob.vrn.ru" target="_blank" rel="noopener">okob.vrn.ru</a> — рекомендации и контакты офтальмологической службы</p>
+      <p class="footer__links"><a href="politika.html">Политика обработки персональных данных</a><br><a href="login.html">Вход для координатора</a></p>
     </div>
   </div>
 </footer>
 
-<script src="auth.js"></script>
+<script src="store.js"></script>
 <script src="app.js"></script>
-<script src="account.js"></script>
+<script src="admin.js"></script>
 </body>
 </html>
