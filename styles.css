@@ -35,7 +35,7 @@
   --note-bg: #33270f; --note-fg: #f0c873; --note-line: #5a4519; color-scheme: dark;
 }
 
-* { box-sizing: border-box; }
+*, *::before, *::after { box-sizing: border-box; }
 html { scroll-behavior: smooth; scroll-padding-top: 72px; }
 body { margin: 0; font: 16px/1.6 Inter, system-ui, sans-serif; color: var(--ink); background: var(--bg); }
 img { max-width: 100%; display: block; }
