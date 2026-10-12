@@ -2,6 +2,7 @@
 const admin = document.getElementById("admin");
 const ROLE_NAMES = { parent: "Родитель", medic: "Медработник", admin: "Администратор" };
 const STATUS_NAMES = { active: "Активен", pending: "На проверке", blocked: "Отключён" };
+const REQ_STATUS = { new: "Новая", work: "В работе", planned: "Выезд запланирован", done: "Проведено", rejected: "Отклонена" };
 let adminTab = "summary";
 try { adminTab = sessionStorage.getItem("bpz-admin-tab") || adminTab; } catch (e) {}
 
@@ -16,7 +17,9 @@ function renderAdmin() {
     return;
   }
   const pending = STATE.users.filter((x) => x.status === "pending").length;
-  const tabs = [["summary", "Сводка"], ["requests", `Заявки${pending ? ` <span class="count">${pending}</span>` : ""}`], ["users", "Пользователи"], ["schools", "Школы"], ["news", "Новости"]];
+  const fresh = (STATE.requests || []).filter((r) => r.status === "new").length;
+  const cnt = (n) => (n ? ` <span class="count">${n}</span>` : "");
+  const tabs = [["summary", "Сводка"], ["visits", "Заявки родителей" + cnt(fresh)], ["requests", "Медработники" + cnt(pending)], ["users", "Пользователи"], ["schools", "Школы"], ["news", "Новости"]];
   admin.innerHTML = `<div class="cab-head"><div><p class="eyebrow eyebrow--teal">Администратор</p><h2>${esc(u.name)}</h2></div>
       <button class="btn btn--outline" id="logout">Выйти</button></div>
     <div class="chips" role="tablist">${tabs.map(([k, t]) => `<button class="chip ${k === adminTab ? "is-active" : ""}" role="tab" aria-selected="${k === adminTab}" data-tab="${k}">${t}</button>`).join("")}</div>
@@ -28,15 +31,16 @@ function renderAdmin() {
     renderAdmin();
   }));
   const body = document.getElementById("adminBody");
-  ({ summary, requests, users, schools, news })[adminTab](body);
+  (({ summary, visits, requests, users, schools, news })[adminTab] || summary)(body);
 }
 
 function summary(body) {
   const by = (r) => STATE.users.filter((x) => x.role === r).length;
+  const reqs = STATE.requests || [];
   const filled = STATE.students.filter((s) => s.card);
   const lv = [0, 1, 2, 3].map((l) => filled.filter((s) => riskLevel(s.card) === l).length);
   body.innerHTML = `<div class="kpis">
-      <div class="kpi"><span class="kpi__v">${by("parent")}</span><span class="kpi__l">родителей</span></div>
+      <div class="kpi"><span class="kpi__v">${reqs.length}</span><span class="kpi__l">заявок от родителей</span></div>
       <div class="kpi"><span class="kpi__v">${by("medic")}</span><span class="kpi__l">медработников</span></div>
       <div class="kpi"><span class="kpi__v">${filled.length} / ${STATE.students.length}</span><span class="kpi__l">карт заполнено</span></div>
       <div class="kpi"><span class="kpi__v">${lv[3]}</span><span class="kpi__l">направлены к офтальмологу</span></div>
@@ -47,9 +51,31 @@ function summary(body) {
     </div>`;
 }
 
+function visits(body) {
+  const reqs = STATE.requests || [];
+  if (!reqs.length) { body.innerHTML = `<div class="card empty"><h3>Заявок пока нет</h3><p class="muted">Здесь появятся заявки родителей со страницы «Пригласить БПЗ».</p></div>`; return; }
+  // Сводка по школам: где больше заявок, туда ехать в первую очередь.
+  const bySchool = {};
+  reqs.forEach((r) => { const k = (r.school.trim() + "|" + r.district).toLowerCase(); (bySchool[k] = bySchool[k] || { school: r.school, district: r.district, n: 0 }).n++; });
+  const top = Object.values(bySchool).sort((a, b) => b.n - a.n);
+  body.innerHTML = `<div class="card"><h3>Школы по числу заявок</h3><div class="table-scroll"><table class="tbl">
+      <thead><tr><th>Школа</th><th>Район</th><th>Заявок</th></tr></thead><tbody>
+      ${top.map((t) => `<tr><td>${esc(t.school)}</td><td>${esc(t.district)}</td><td><b>${t.n}</b></td></tr>`).join("")}</tbody></table></div></div>
+    <div class="card"><h3>Все заявки</h3><div class="table-scroll"><table class="tbl">
+      <thead><tr><th>Дата</th><th>Школа</th><th>Возраст детей</th><th>Контакт</th><th>Комментарий</th><th>Статус</th></tr></thead><tbody>
+      ${reqs.map((r) => `<tr><td>${esc(r.date)}</td><td>${esc(r.school)}<br><span class="muted">${esc(r.district)}</span></td>
+        <td>${esc((r.ages || []).join(", ") || "—")}</td><td>${esc(r.name)}<br><span class="muted">${esc(r.phone)}${r.email ? "<br>" + esc(r.email) : ""}</span></td>
+        <td>${esc(r.comment || "—")}</td>
+        <td><select class="req-status" data-req="${r.id}" aria-label="Статус заявки">${Object.entries(REQ_STATUS).map(([k, t]) => `<option value="${k}" ${k === r.status ? "selected" : ""}>${t}</option>`).join("")}</select></td></tr>`).join("")}
+      </tbody></table></div></div>`;
+  body.querySelectorAll("[data-req]").forEach((sel) => sel.addEventListener("change", () => {
+    reqs.find((r) => r.id === sel.dataset.req).status = sel.value; commit(); renderAdmin();
+  }));
+}
+
 function requests(body) {
   const list = STATE.users.filter((x) => x.status === "pending");
-  body.innerHTML = list.length ? `<div class="card"><h3>Заявки медработников</h3><div class="table-scroll"><table class="tbl">
+  body.innerHTML = list.length ? `<div class="card"><h3>Медработники на проверке</h3><div class="table-scroll"><table class="tbl">
       <thead><tr><th>ФИО</th><th>Школа</th><th>Должность</th><th>Email</th><th></th></tr></thead><tbody>
       ${list.map((x) => `<tr><td>${esc(x.name)}</td><td>${esc(x.school)}</td><td>${esc(x.position)}</td><td>${esc(x.email)}</td>
         <td class="tbl__act"><button class="btn btn--sm btn--primary" data-approve="${x.id}">Одобрить</button><button class="btn btn--sm btn--outline" data-reject="${x.id}">Отклонить</button></td></tr>`).join("")}

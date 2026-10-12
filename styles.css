@@ -324,3 +324,16 @@ textarea { resize: vertical; }
 
 @media (max-width: 900px) { .cab-medic { grid-template-columns: 1fr; } }
 @media (max-width: 560px) { .fields, .roles { grid-template-columns: 1fr; } }
+
+/* request form + CTA */
+.field--wide { grid-column: 1 / -1; }
+.ages { border: 0; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px 20px; }
+.ages legend { font: 500 14px Inter, sans-serif; text-transform: none; color: var(--ink); margin-bottom: 8px; width: 100%; }
+.section--cta { padding-block: 0; }
+.cta { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px 32px; background: var(--grad); color: #fff; border-radius: var(--radius); padding: 32px; margin-top: 56px; }
+@media (max-width: 560px) { .cta { padding: 24px; } }
+.cta h2 { color: #fff; margin: 0 0 6px; font-size: clamp(24px, 3.4vw, 34px); }
+.cta p { margin: 0; opacity: .95; }
+#adminBody { display: flex; flex-direction: column; gap: 24px; }
+#adminBody > .grid2 { margin: 0; }
+.req-status { font: inherit; font-size: 13px; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); }

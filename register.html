@@ -35,7 +35,7 @@
       <a href="news.html">Новости</a>
       <a href="analytics.html">Аналитика</a>
       <a href="login.html" class="nav__login" data-auth aria-current="page">Войти</a>
-      <a href="https://okob.vrn.ru" target="_blank" rel="noopener" class="nav__cta">Родителям</a>
+      <a href="request.html" class="nav__cta">Пригласить БПЗ</a>
     </nav>
   </div>
 </header>
@@ -51,11 +51,8 @@
     <div class="wrap narrow">
       <p class="note">Демо: данные сохраняются только в этом браузере и никуда не отправляются.</p>
       <form id="registerForm" class="card form" novalidate>
-        <fieldset class="roles">
-          <legend>Кто вы?</legend>
-          <label class="role"><input type="radio" name="role" value="parent" id="roleParent" checked><span><b>Родитель</b>Результаты скрининга ребёнка и рекомендации</span></label>
-          <label class="role"><input type="radio" name="role" value="medic" id="roleMedic"><span><b>Медработник школы</b>Заполнение «Карт предикторов миопии»</span></label>
-        </fieldset>
+        <input type="hidden" name="role" value="medic">
+        <p class="intro">Регистрация для медработников школ. Родителям регистрироваться не нужно — чтобы пригласить БПЗ в школу, <a href="request.html">оставьте заявку</a>.</p>
 
         <div class="fields">
           <label class="field"><span>ФИО</span><input id="regName" name="name" required autocomplete="name"></label>
@@ -64,23 +61,14 @@
           <label class="field"><span>Пароль <small>не менее 8 символов</small></span><input id="regPass" name="password" type="password" minlength="8" required autocomplete="new-password"></label>
         </div>
 
-        <fieldset class="fields" data-role="parent">
-          <legend>Ребёнок</legend>
-          <label class="field"><span>ФИО ребёнка</span><input id="regChild" name="child"></label>
-          <label class="field"><span>Возраст</span>
-            <select id="regAge" name="age"><option value="8">8 лет</option><option value="9">9 лет</option><option value="11">11 лет</option><option value="12">12 лет</option><option value="13">13 лет</option></select></label>
-          <label class="field"><span>Школа</span><select id="regSchoolP" name="schoolP" data-schools></select></label>
-          <label class="field"><span>Класс</span><input id="regClass" name="cls" placeholder="2А"></label>
-        </fieldset>
-
-        <fieldset class="fields" data-role="medic" hidden>
+        <fieldset class="fields">
           <legend>Место работы</legend>
           <label class="field"><span>Школа</span><select id="regSchoolM" name="schoolM" data-schools></select></label>
           <label class="field"><span>Должность</span><input id="regPosition" name="position" placeholder="Медсестра"></label>
           <p class="hint">Доступ медработника открывает администратор после проверки.</p>
         </fieldset>
 
-        <label class="check"><input type="checkbox" id="regConsent" name="consent" required><span>Даю согласие на обработку персональных данных (152-ФЗ)<span data-role="parent"> — моих и моего ребёнка</span></span></label>
+        <label class="check"><input type="checkbox" id="regConsent" name="consent" required><span>Даю согласие на обработку персональных данных (152-ФЗ)</span></label>
         <p class="form__error" id="regError" hidden></p>
         <button class="btn btn--primary" type="submit">Зарегистрироваться</button>
         <p class="muted">Уже есть аккаунт? <a href="login.html">Войти</a></p>

@@ -1,6 +1,6 @@
-// Демо-авторизация прототипа. Сервера нет: пользователи, ученики и новости
+// Демо-авторизация прототипа. Сервера нет: пользователи, ученики, заявки и новости
 // хранятся в localStorage этого браузера. Пароли не сохраняются.
-const STORE_KEY = "bpz-demo-v1";
+const STORE_KEY = "bpz-demo-v2";
 
 const SCHOOLS = ["Школа № 1", "Гимназия № 2", "Лицей № 3", "Школа № 4", "Школа № 5"];
 
@@ -29,7 +29,6 @@ function seed() {
     users: [
       { id: "u-admin", role: "admin", name: "Координатор проекта", email: "admin@demo", status: "active" },
       { id: "u-med", role: "medic", name: "Петрова Ольга Ивановна", email: "medic@demo", school: "Школа № 1", position: "Медсестра", status: "active" },
-      { id: "u-par", role: "parent", name: "Иванова Анна Сергеевна", email: "parent@demo", childId: "s-1", status: "active" },
       { id: "u-med2", role: "medic", name: "Смирнова Елена Павловна", email: "smirnova@demo", school: "Лицей № 3", position: "Фельдшер", status: "pending" },
     ],
     students: [
@@ -42,6 +41,11 @@ function seed() {
       s("s-7", "Зайцев Кирилл", 9, "3А", null),
     ],
     news: [],
+    requests: [
+      { id: "r-1", date: "05.10.2026", name: "Анна", phone: "+7 900 000-00-01", email: "", district: "Советский", school: "Школа № 12", ages: ["7–8 лет", "9–10 лет"], comment: "Готовы 15 родителей из 2А", status: "new" },
+      { id: "r-2", date: "07.10.2026", name: "Игорь", phone: "+7 900 000-00-02", email: "", district: "Советский", school: "Школа № 12", ages: ["11–12 лет"], comment: "", status: "new" },
+      { id: "r-3", date: "08.10.2026", name: "Марина", phone: "+7 900 000-00-03", email: "", district: "Левобережный", school: "Гимназия № 9", ages: ["9–10 лет"], comment: "", status: "planned" },
+    ],
   };
 }
 

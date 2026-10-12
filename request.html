@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Пригласить БПЗ · Большая перемена здоровья</title>
+<meta name="description" content="Заявка родителей на проведение скрининга в школе.">
+<link rel="icon" href="assets/emblem.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Playfair+Display:ital,wght@1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="partners-bar">
+  <div class="wrap partners-bar__in">
+    <span class="partners-bar__lbl">Партнёры проекта</span>
+    <ul class="partners">
+      <li class="partner"><span class="partner__logo" data-abbr="МЗ"><img src="assets/partners/minzdrav.png" alt="" onerror="this.remove()"></span><span class="partner__name">Министерство здравоохранения<br>Воронежской области</span></li>
+      <li class="partner"><span class="partner__logo" data-abbr="МО"><img src="assets/partners/minobr.png" alt="" onerror="this.remove()"></span><span class="partner__name">Министерство образования<br>Воронежской области</span></li>
+      <li class="partner"><span class="partner__logo" data-abbr="МС"><img src="assets/partners/minsport.png" alt="" onerror="this.remove()"></span><span class="partner__name">Министерство физической культуры<br>и спорта Воронежской области</span></li>
+    </ul>
+  </div>
+</div>
+
+<header class="topbar">
+  <div class="wrap topbar__in">
+    <a href="index.html" class="brand">
+      <img src="assets/emblem.png" alt="" width="44" height="36">
+      <span class="brand__txt"><b>Большая перемена</b><small>здоровья | Воронеж</small></span>
+    </a>
+    <button class="burger" aria-label="Меню" aria-expanded="false">☰</button>
+    <nav class="nav">
+      <a href="about.html">О программе</a>
+      <a href="news.html">Новости</a>
+      <a href="analytics.html">Аналитика</a>
+      <a href="login.html" class="nav__login" data-auth>Войти</a>
+      <a href="request.html" class="nav__cta" aria-current="page">Пригласить БПЗ</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <section class="page-head">
+    <div class="wrap">
+      <p class="crumbs"><a href="index.html">Главная</a> / Пригласить БПЗ</p>
+      <h1>Пригласить БПЗ <em>в школу</em></h1>
+    </div>
+  </section>
+  <section class="section section--first">
+    <div class="wrap narrow">
+      <p class="intro">Хотите, чтобы скрининг «Большой перемены здоровья» прошёл в школе вашего ребёнка? Оставьте заявку — координатор проекта свяжется с вами и со школой.</p>
+      <p class="note">Демо: заявка сохраняется только в этом браузере и видна в панели администратора.</p>
+      <form id="requestForm" class="card form" novalidate>
+        <div class="fields">
+          <label class="field"><span>Ваше имя</span><input id="rqName" required autocomplete="name"></label>
+          <label class="field"><span>Телефон</span><input id="rqPhone" type="tel" required autocomplete="tel" placeholder="+7"></label>
+          <label class="field"><span>Email <small>необязательно</small></span><input id="rqEmail" type="email" autocomplete="email"></label>
+          <label class="field"><span>Район</span>
+            <select id="rqDistrict"><option>Железнодорожный</option><option>Коминтерновский</option><option>Левобережный</option><option>Ленинский</option><option>Советский</option><option>Центральный</option><option>Другой населённый пункт</option></select></label>
+          <label class="field field--wide"><span>Школа <small>номер или название</small></span><input id="rqSchool" required placeholder="Например, школа № 12"></label>
+          <fieldset class="field field--wide ages">
+            <legend>Возраст детей, для которых нужен скрининг</legend>
+            <label class="check"><input type="checkbox" name="age" value="7–8 лет"><span>7–8 лет</span></label>
+            <label class="check"><input type="checkbox" name="age" value="9–10 лет"><span>9–10 лет</span></label>
+            <label class="check"><input type="checkbox" name="age" value="11–12 лет"><span>11–12 лет</span></label>
+            <label class="check"><input type="checkbox" name="age" value="13–15 лет"><span>13–15 лет</span></label>
+          </fieldset>
+          <label class="field field--wide"><span>Комментарий <small>необязательно</small></span><textarea id="rqComment" rows="3" placeholder="Например, сколько родителей класса готовы участвовать"></textarea></label>
+        </div>
+        <label class="check"><input type="checkbox" id="rqConsent" required><span>Согласен на обработку имени и контактов для связи по заявке (152-ФЗ)</span></label>
+        <p class="hint">Не указывайте в заявке данные о здоровье ребёнка — они не нужны.</p>
+        <p class="form__error" id="rqError" hidden></p>
+        <button class="btn btn--primary" type="submit">Отправить заявку</button>
+      </form>
+      <div class="card empty" id="rqDone" hidden>
+        <h3>Заявка отправлена</h3>
+        <p>Спасибо! Координатор проекта свяжется с вами по указанному телефону. Чем больше родителей одной школы оставят заявки, тем быстрее БПЗ приедет.</p>
+        <a class="btn btn--outline" href="index.html">На главную</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap footer__in">
+    <div>
+      <img src="assets/emblem.png" alt="" width="56" height="46">
+      <p><b>Большая перемена здоровья | Воронеж</b><br>Межведомственный проект о здоровье школьников</p>
+    </div>
+    <div>
+      <p class="footer__h">Партнёры</p>
+      <p>Министерство здравоохранения Воронежской области<br>Министерство образования Воронежской области<br>Министерство физической культуры и спорта Воронежской области<br>Управление образования и молодёжной политики администрации г. Воронежа<br>Воронежская областная клиническая офтальмологическая больница</p>
+    </div>
+    <div>
+      <p class="footer__h">Родителям</p>
+      <p><a href="https://okob.vrn.ru" target="_blank" rel="noopener">okob.vrn.ru</a> — рекомендации и контакты офтальмологической службы</p>
+    </div>
+  </div>
+</footer>
+
+<script src="auth.js"></script>
+<script src="app.js"></script>
+<script src="request.js"></script>
+</body>
+</html>
