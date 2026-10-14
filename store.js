@@ -9,6 +9,7 @@ const PERMS = {
   "requests.view": ["superadmin", "coordinator"],
   "requests.edit": ["superadmin", "coordinator"],
   "requests.delete": ["superadmin"],
+  "requests.export": ["superadmin", "coordinator"],
   "summary.view": ["superadmin", "coordinator", "editor", "viewer"],
   "news.manage": ["superadmin", "coordinator", "editor"],
   "users.manage": ["superadmin"],
@@ -127,6 +128,25 @@ const Store = {
     if (await apiReady) return call("admin.php?action=delete_request", { method: "POST", data: { id } });
     demo.need("requests.delete");
     demo.edit((s) => { s.requests = s.requests.filter((r) => r.id !== id); demo.log(s, "request_delete", `Заявка #${id}`); });
+  },
+  // Выгрузка заявок в .xlsx: на сервере — api/admin.php?action=export, в демо — xlsx.js в браузере.
+  async exportRequests() {
+    if (await apiReady) {
+      const res = await fetch("api/admin.php?action=export", { credentials: "same-origin" });
+      if (!res.ok || (res.headers.get("Content-Type") || "").includes("json")) {
+        let msg = "Не удалось выгрузить файл.";
+        try { msg = (await res.json()).error || msg; } catch (e) {}
+        throw new Error(msg);
+      }
+      return res.blob();
+    }
+    demo.need("requests.export");
+    const STATUS = { new: "Новая", work: "В работе", planned: "Выезд запланирован", done: "Проведено", rejected: "Отклонена" };
+    const reqs = demo.load().requests;
+    demo.edit((s) => demo.log(s, "requests_export", "Строк: " + reqs.length));
+    return buildXlsx(["Дата (МСК)", "Школа", "Район", "Возраст детей", "Имя", "Телефон", "Email", "Комментарий", "Статус"],
+      reqs.map((r) => [new Date(r.created_at.replace(" ", "T") + "Z").toLocaleString("ru-RU", { timeZone: "Europe/Moscow", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }).replace(",", ""), r.school, r.district, r.ages, r.name, r.phone, r.email, r.comment, STATUS[r.status] || r.status]),
+      [16, 24, 18, 18, 16, 18, 24, 40, 18], "Заявки");
   },
   async summary() {
     if (await apiReady) return call("admin.php?action=summary");

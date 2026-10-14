@@ -41,7 +41,7 @@ function showError(text) {
 
 const ACTIONS = {
   setup: "Настройка сайта", login: "Вход", login_failed: "Неудачный вход", logout: "Выход", password_change: "Смена своего пароля",
-  request_status: "Статус заявки", request_delete: "Удаление заявки", news_add: "Новость добавлена", news_delete: "Новость удалена",
+  request_status: "Статус заявки", request_delete: "Удаление заявки", requests_export: "Выгрузка в Excel", news_add: "Новость добавлена", news_delete: "Новость удалена",
   user_create: "Пользователь создан", user_update: "Пользователь изменён", user_password_reset: "Сброс пароля",
 };
 
@@ -91,7 +91,9 @@ function viewRequests(body, { requests, me, refresh }) {
     return;
   }
   const edit = can(me, "requests.edit"), del = can(me, "requests.delete");
-  body.innerHTML = `<div class="card"><h3>Все заявки</h3><div class="table-scroll"><table class="tbl">
+  body.innerHTML = `<div class="card"><div class="card__head"><h3>Все заявки <span class="muted">(${requests.length})</span></h3>
+    ${can(me, "requests.export") ? `<button class="btn btn--sm btn--outline" id="exportXlsx">⬇ Выгрузить в Excel</button>` : ""}</div>
+    <p class="form__error" id="exportError" hidden></p><div class="table-scroll"><table class="tbl">
     <thead><tr><th>Дата</th><th>Школа</th><th>Возраст детей</th><th>Контакт</th><th>Комментарий</th><th>Статус</th>${del ? "<th></th>" : ""}</tr></thead><tbody>
     ${requests.map((r) => `<tr><td>${fmtDate(r.created_at)}</td><td>${esc(r.school)}<br><span class="muted">${esc(r.district)}</span></td>
       <td>${esc(r.ages || "—")}</td>
@@ -101,6 +103,18 @@ function viewRequests(body, { requests, me, refresh }) {
         : `<span class="status status--${r.status === "new" ? "pending" : "active"}">${REQ_STATUS[r.status]}</span>`}</td>
       ${del ? `<td class="tbl__act"><button class="btn btn--sm btn--outline" data-del="${r.id}" aria-label="Удалить заявку">✕</button></td>` : ""}</tr>`).join("")}
     </tbody></table></div></div>`;
+  const exp = document.getElementById("exportXlsx");
+  if (exp) exp.addEventListener("click", async () => {
+    const err = document.getElementById("exportError");
+    err.hidden = true; exp.disabled = true; exp.textContent = "Готовим файл…";
+    try {
+      const blob = await Store.exportRequests();
+      const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: `zayavki-bpz-${new Date().toISOString().slice(0, 10)}.xlsx` });
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    } catch (ex) { err.textContent = ex.message; err.hidden = false; }
+    finally { exp.disabled = false; exp.textContent = "⬇ Выгрузить в Excel"; }
+  });
   body.querySelectorAll("[data-req]").forEach((sel) => sel.addEventListener("change", async () => {
     try { await Store.setStatus(Number(sel.dataset.req), sel.value); refresh(); } catch (ex) { alertRow(sel, ex.message); }
   }));

@@ -36,6 +36,27 @@ if ($action === 'delete_request') {
     json_out(['ok' => true]);
 }
 
+if ($action === 'export') {
+    require_method('GET');
+    $a = require_admin(false, 'requests.export');
+    require __DIR__ . '/xlsx.php';
+    cleanup_old_requests();
+    $rows = [];
+    foreach ($pdo->query('SELECT created_at, school, district, ages, name, phone, email, comment, status FROM requests ORDER BY created_at DESC') as $r) {
+        $rows[] = [gmdate('d.m.Y H:i', strtotime($r['created_at'] . ' UTC') + 3 * 3600), $r['school'], $r['district'], $r['ages'],
+            $r['name'], $r['phone'], $r['email'], $r['comment'], STATUS_LABELS[$r['status']] ?? $r['status']];
+    }
+    $file = xlsx_build(['Дата (МСК)', 'Школа', 'Район', 'Возраст детей', 'Имя', 'Телефон', 'Email', 'Комментарий', 'Статус'],
+        $rows, [16, 24, 18, 18, 16, 18, 24, 40, 18], 'Заявки');
+    audit($a, 'requests_export', 'Строк: ' . count($rows));
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header('Content-Disposition: attachment; filename="zayavki-bpz-' . gmdate('Y-m-d') . '.xlsx"');
+    header('Cache-Control: no-store');
+    header('Content-Length: ' . strlen($file));
+    echo $file;
+    exit;
+}
+
 // ---------- Сводка: только агрегаты, без контактов ----------
 if ($action === 'summary') {
     require_method('GET');
