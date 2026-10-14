@@ -91,6 +91,7 @@ const PERMS = [
     'requests.view'   => ['superadmin', 'coordinator'],
     'requests.edit'   => ['superadmin', 'coordinator'],
     'requests.delete' => ['superadmin'],
+    'requests.export' => ['superadmin', 'coordinator'],
     'summary.view'    => ['superadmin', 'coordinator', 'editor', 'viewer'],
     'news.manage'     => ['superadmin', 'coordinator', 'editor'],
     'users.manage'    => ['superadmin'],

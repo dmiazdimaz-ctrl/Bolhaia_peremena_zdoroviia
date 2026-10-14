@@ -7,3 +7,6 @@
   RewriteRule ^data/ - [F,L]
 </IfModule>
 Options -Indexes
+<Files "xlsx.php">
+  Require all denied
+</Files>

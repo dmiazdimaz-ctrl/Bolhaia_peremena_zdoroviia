@@ -369,3 +369,6 @@ button:disabled { opacity: .6; cursor: progress; }
 #resetBox .form__ok { margin-top: 16px; }
 .tbl td.is-warn { color: var(--crit-fg); font-weight: 600; }
 .tbl select:disabled { opacity: .6; }
+.card__head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px 16px; margin-bottom: 12px; }
+.card__head h3 { margin: 0; }
+.card__head h3 .muted { font: 400 15px Inter, sans-serif; text-transform: none; }
