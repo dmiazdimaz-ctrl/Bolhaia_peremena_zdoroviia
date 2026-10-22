@@ -22,32 +22,7 @@ const NEWS = [
     url: "https://www.okob.vrn.ru/big-health-change" },
 ];
 
-// Демо-данные аналитики. В рабочей версии — данные координаторов проекта.
-const AGES = [
-  { age: "8 лет", plan: 900, fact: 880 },
-  { age: "9 лет", plan: 850, fact: 790 },
-  { age: "11 лет", plan: 820, fact: 610 },
-  { age: "12 лет", plan: 800, fact: 480 },
-  { age: "13 лет", plan: 780, fact: 360 },
-];
-
-const RISK = [
-  { label: "Нет факторов риска", value: 2278, color: "#c9d6e6" },
-  { label: "1 уровень риска", value: 446, color: "#4fb89b" },
-  { label: "2 уровень риска", value: 182, color: "#2f7aa0" },
-  { label: "3 уровень — к офтальмологу", value: 214, color: "#2457a0" },
-];
-
-const FACTORS = [
-  { label: "Много времени с гаджетами (> 1,5 ч/день)", pct: 41 },
-  { label: "Мало времени на улице (< 90 мин/день)", pct: 34 },
-  { label: "Близорукость у одного или обоих родителей", pct: 22 },
-  { label: "Положительный тест Малиновского", pct: 9 },
-  { label: "Нарушения движений глаз / бинокулярного зрения", pct: 5 },
-];
-
 const $ = (s) => document.querySelector(s);
-const fmt = (n) => n.toLocaleString("ru-RU");
 
 // Меню на мобильных
 const burger = $(".burger"), nav = $(".nav");
@@ -88,37 +63,4 @@ if (newsList) {
     const active = document.querySelector("[data-f].is-active");
     renderNews(active ? active.dataset.f : "all");
   });
-}
-
-if ($("#ageBars")) {
-  // Охват по возрастам
-  const max = Math.max(...AGES.map((a) => a.plan));
-  $("#ageBars").innerHTML = AGES.map((a) => `
-    <div class="bar" title="${a.age}: ${fmt(a.fact)} из ${fmt(a.plan)}">
-      <div class="bar__plan" style="height:${(a.plan / max) * 100}%"></div>
-      <span class="bar__v">${fmt(a.fact)}</span>
-      <div class="bar__fact" style="height:${(a.fact / max) * 88}%"></div>
-    </div>`).join("");
-  $("#ageBars").insertAdjacentHTML("afterend",
-    `<div class="bar__x">${AGES.map((a) => `<span>${a.age}</span>`).join("")}</div>`);
-
-  // Группы риска (кольцевая диаграмма)
-  const total = RISK.reduce((s, r) => s + r.value, 0);
-  const R = 15.915; // длина окружности = 100
-  let offset = 0;
-  $("#donut").innerHTML = RISK.map((r) => {
-    const pct = (r.value / total) * 100;
-    const seg = `<circle cx="21" cy="21" r="${R}" fill="none" stroke="${r.color}" stroke-width="6"
-      stroke-dasharray="${pct} ${100 - pct}" stroke-dashoffset="${-offset}"><title>${r.label}: ${fmt(r.value)}</title></circle>`;
-    offset += pct;
-    return seg;
-  }).join("");
-  $("#legend").innerHTML = RISK.map((r) =>
-    `<li><i style="background:${r.color}"></i><b>${Math.round((r.value / total) * 100)}%</b>${r.label} <span class="muted">(${fmt(r.value)})</span></li>`).join("");
-
-  // Факторы риска
-  $("#factorBars").innerHTML = FACTORS.map((f) => `
-    <div class="hbar"><span>${f.label}</span>
-      <div class="hbar__track"><div class="hbar__fill" style="width:${f.pct}%"></div></div>
-      <b>${f.pct}%</b></div>`).join("");
 }
